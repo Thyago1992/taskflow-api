@@ -3,6 +3,7 @@ package com.thyago.taskflow_api.service;
 import com.thyago.taskflow_api.dto.TarefaRequestDTO;
 import com.thyago.taskflow_api.dto.TarefaResponseDTO;
 import com.thyago.taskflow_api.entity.Tarefa;
+import com.thyago.taskflow_api.exception.ObjectNotFoundException;
 import com.thyago.taskflow_api.repository.TarefaRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ public class TarefaService {
     }
 
     public void delete(Long id) {
-        tarefaRepository.findById(id).orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
+        tarefaRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
         tarefaRepository.deleteById(id);
     }
 
@@ -62,8 +63,8 @@ public class TarefaService {
     }
 
     public TarefaResponseDTO atualizarStatus(Long id, String status) {
-        tarefaRepository.findById(id).orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
-        Tarefa tarefa = modelMapper.map(tarefaRepository.findById(id).get(), Tarefa.class);
+        tarefaRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
+        Tarefa tarefa = modelMapper.map(tarefaRepository.findById(id), Tarefa.class);
         tarefa.setStatus(status);
         Tarefa salvo = tarefaRepository.save(tarefa);
         return modelMapper.map(salvo, TarefaResponseDTO.class);

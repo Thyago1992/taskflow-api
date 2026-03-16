@@ -41,10 +41,10 @@ public class UsuarioService {
     }
 
     public UsuarioResponseDTO update(Long id, UsuarioRequestDTO dto) {
-        usuarioRepository.findById(id)
+        Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        Usuario usuario = modelMapper.map(dto, Usuario.class);
-        usuario.setId(id);
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
         Usuario salvo = usuarioRepository.save(usuario);
         return modelMapper.map(salvo, UsuarioResponseDTO.class);
     }
