@@ -3,8 +3,10 @@ package com.thyago.taskflow_api.service;
 import com.thyago.taskflow_api.dto.TarefaRequestDTO;
 import com.thyago.taskflow_api.dto.TarefaResponseDTO;
 import com.thyago.taskflow_api.entity.Tarefa;
+import com.thyago.taskflow_api.entity.Usuario;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
 import com.thyago.taskflow_api.repository.TarefaRepository;
+import com.thyago.taskflow_api.repository.UsuarioRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,9 @@ public class TarefaService {
 
     @Autowired
     private TarefaRepository tarefaRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -35,9 +40,18 @@ public class TarefaService {
     }
 
     public TarefaResponseDTO save(TarefaRequestDTO dto) {
+        Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
+                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
 
-        Tarefa tarefa = modelMapper.map(dto, Tarefa.class);
+        Tarefa tarefa = new Tarefa();
+        tarefa.setTitulo(dto.getTitulo());
+        tarefa.setDescricao(dto.getDescricao());
+        tarefa.setStatus(dto.getStatus());
+        tarefa.setPrioridade(dto.getPrioridade());
+        tarefa.setDataValidade(dto.getDataValidade());
+        tarefa.setUsuario(usuario);
         tarefa.setDataCriacao(LocalDate.now());
+
         Tarefa salvo = tarefaRepository.save(tarefa);
         return modelMapper.map(salvo, TarefaResponseDTO.class);
     }
