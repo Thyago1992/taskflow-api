@@ -43,9 +43,15 @@ public class TarefaService {
     }
 
     public TarefaResponseDTO update(Long id, TarefaRequestDTO dto) {
-        tarefaRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
-        Tarefa tarefa = modelMapper.map(dto, Tarefa.class);
-        tarefa.setId(id);
+        Tarefa tarefa = tarefaRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
+
+        tarefa.setTitulo(dto.getTitulo());
+        tarefa.setDescricao(dto.getDescricao());
+        tarefa.setStatus(dto.getStatus());
+        tarefa.setPrioridade(dto.getPrioridade());
+        tarefa.setDataValidade(dto.getDataValidade());
+
         Tarefa salvo = tarefaRepository.save(tarefa);
         return modelMapper.map(salvo, TarefaResponseDTO.class);
     }
