@@ -30,7 +30,7 @@ public class TarefaService {
 
     public TarefaResponseDTO findById(Long id) {
         Tarefa tarefa = tarefaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
+                .orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
         return modelMapper.map(tarefa, TarefaResponseDTO.class);
     }
 
@@ -43,7 +43,7 @@ public class TarefaService {
     }
 
     public TarefaResponseDTO update(Long id, TarefaRequestDTO dto) {
-        tarefaRepository.findById(id).orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
+        tarefaRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
         Tarefa tarefa = modelMapper.map(dto, Tarefa.class);
         tarefa.setId(id);
         Tarefa salvo = tarefaRepository.save(tarefa);
@@ -56,15 +56,15 @@ public class TarefaService {
     }
 
     public List<TarefaResponseDTO> findByUsuario(Long idUsuario) {
-        return tarefaRepository.findByIdUsuario(idUsuario) // ✅
+        return tarefaRepository.findByUsuarioId(idUsuario) // ✅
                 .stream()
                 .map(tarefa -> modelMapper.map(tarefa, TarefaResponseDTO.class))
                 .toList();
     }
 
     public TarefaResponseDTO atualizarStatus(Long id, String status) {
-        tarefaRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
-        Tarefa tarefa = modelMapper.map(tarefaRepository.findById(id), Tarefa.class);
+        Tarefa tarefa = tarefaRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
         tarefa.setStatus(status);
         Tarefa salvo = tarefaRepository.save(tarefa);
         return modelMapper.map(salvo, TarefaResponseDTO.class);

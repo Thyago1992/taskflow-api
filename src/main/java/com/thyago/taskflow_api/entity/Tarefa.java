@@ -17,9 +17,11 @@ public class Tarefa {
     private String prioridade;
     private LocalDate dataCriacao;
     private LocalDate dataValidade;
-    private Long idUsuario;
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
 
-    public Tarefa(Long id, String titulo, String descricao, String status, String prioridade, LocalDate dataCriacao, LocalDate dataValidade, Long idUsuario) {
+    public Tarefa(Long id, String titulo, String descricao, String status, String prioridade, LocalDate dataCriacao, LocalDate dataValidade, Usuario usuario) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
@@ -27,7 +29,7 @@ public class Tarefa {
         this.prioridade = prioridade;
         this.dataCriacao = dataCriacao;
         this.dataValidade = dataValidade;
-        this.idUsuario = idUsuario;
+        this.usuario = usuario;
     }
 
     public Tarefa() {
@@ -89,12 +91,12 @@ public class Tarefa {
         this.dataValidade = dataValidade;
     }
 
-    public Long getIdUsuario() {
-        return idUsuario;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setIdUsuario(Long idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     @Override
@@ -109,6 +111,6 @@ public class Tarefa {
               Data Criacao: %s
               Data Validade:%s
               ID Usuario:   %d
-            """.formatted(id, titulo, descricao, status, prioridade, dataCriacao, dataValidade, idUsuario);
+            """.formatted(id, titulo, descricao, status, prioridade, dataCriacao, dataValidade, usuario.getId());
     }
 }

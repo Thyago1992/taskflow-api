@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
 
-    List<Tarefa> findByIdUsuario(Long idUsuario);
+    List<Tarefa> findByUsuarioId (Long idUsuario);
 
 }
