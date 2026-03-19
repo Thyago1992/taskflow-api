@@ -1,14 +1,28 @@
 package com.thyago.taskflow_api.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 
 public class TarefaRequestDTO {
 
+    @NotBlank(message = "O título é obrigatório")
     private String titulo;
+
+    @NotBlank(message = "A descrição é obrigatória")
     private String descricao;
+
+    @NotBlank(message = "O status é obrigatório")
     private String status;
+
+    @NotBlank(message = "A prioridade é obrigatória")
     private String prioridade;
+
+    @NotNull(message = "A data de validade é obrigatória")
     private LocalDate dataValidade;
+
+    @NotNull(message = "O ID do usuário é obrigatório")
     private Long idUsuario;
 
     public String getTitulo() {

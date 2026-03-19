@@ -3,6 +3,7 @@ package com.thyago.taskflow_api.service;
 import com.thyago.taskflow_api.dto.UsuarioRequestDTO;
 import com.thyago.taskflow_api.dto.UsuarioResponseDTO;
 import com.thyago.taskflow_api.entity.Usuario;
+import com.thyago.taskflow_api.exception.ObjectNotFoundException;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class UsuarioService {
 
     public UsuarioResponseDTO findById(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
         return modelMapper.map(usuario, UsuarioResponseDTO.class);
     }
 
@@ -42,7 +43,7 @@ public class UsuarioService {
 
     public UsuarioResponseDTO update(Long id, UsuarioRequestDTO dto) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
         Usuario salvo = usuarioRepository.save(usuario);
@@ -51,7 +52,7 @@ public class UsuarioService {
 
     public void delete(Long id) {
         usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
         usuarioRepository.deleteById(id);
     }
 }

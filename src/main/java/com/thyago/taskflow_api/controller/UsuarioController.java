@@ -2,8 +2,6 @@ package com.thyago.taskflow_api.controller;
 
 import com.thyago.taskflow_api.dto.UsuarioRequestDTO;
 import com.thyago.taskflow_api.dto.UsuarioResponseDTO;
-import com.thyago.taskflow_api.entity.Usuario;
-import com.thyago.taskflow_api.repository.UsuarioRepository;
 import com.thyago.taskflow_api.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
