@@ -23,7 +23,11 @@ public class Tarefa {
     private Long id;
     private String titulo;
     private String descricao;
+
+    @Enumerated(EnumType.STRING)
     private StatusTarefa status;
+
+    @Enumerated(EnumType.STRING)
     private PrioridadeTarefa prioridade;
     private LocalDate dataCriacao;
     private LocalDate dataValidade;
