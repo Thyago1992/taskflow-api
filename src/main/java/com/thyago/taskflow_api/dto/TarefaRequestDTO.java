@@ -15,10 +15,10 @@ public class TarefaRequestDTO {
     @NotBlank(message = "A descrição é obrigatória")
     private String descricao;
 
-    @NotBlank(message = "O status é obrigatório")
+    @NotNull(message = "O status é obrigatório")
     private StatusTarefa status;
 
-    @NotBlank(message = "A prioridade é obrigatória")
+    @NotNull(message = "A prioridade é obrigatória")
     private PrioridadeTarefa prioridade;
 
     @NotNull(message = "A data de validade é obrigatória")
