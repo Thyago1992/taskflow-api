@@ -1,5 +1,7 @@
 package com.thyago.taskflow_api.dto;
 
+import com.thyago.taskflow_api.enums.PrioridadeTarefa;
+import com.thyago.taskflow_api.enums.StatusTarefa;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -14,10 +16,10 @@ public class TarefaRequestDTO {
     private String descricao;
 
     @NotBlank(message = "O status é obrigatório")
-    private String status;
+    private StatusTarefa status;
 
     @NotBlank(message = "A prioridade é obrigatória")
-    private String prioridade;
+    private PrioridadeTarefa prioridade;
 
     @NotNull(message = "A data de validade é obrigatória")
     private LocalDate dataValidade;
@@ -41,22 +43,6 @@ public class TarefaRequestDTO {
         this.descricao = descricao;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getPrioridade() {
-        return prioridade;
-    }
-
-    public void setPrioridade(String prioridade) {
-        this.prioridade = prioridade;
-    }
-
     public LocalDate getDataValidade() {
         return dataValidade;
     }
@@ -71,5 +57,21 @@ public class TarefaRequestDTO {
 
     public void setIdUsuario(Long idUsuario) {
         this.idUsuario = idUsuario;
+    }
+
+    public StatusTarefa getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusTarefa status) {
+        this.status = status;
+    }
+
+    public PrioridadeTarefa getPrioridade() {
+        return prioridade;
+    }
+
+    public void setPrioridade(PrioridadeTarefa prioridade) {
+        this.prioridade = prioridade;
     }
 }

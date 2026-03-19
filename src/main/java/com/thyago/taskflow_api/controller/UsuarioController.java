@@ -3,6 +3,7 @@ package com.thyago.taskflow_api.controller;
 import com.thyago.taskflow_api.dto.UsuarioRequestDTO;
 import com.thyago.taskflow_api.dto.UsuarioResponseDTO;
 import com.thyago.taskflow_api.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> save(@RequestBody UsuarioRequestDTO dto) {
+    public ResponseEntity<UsuarioResponseDTO> save(@Valid @RequestBody UsuarioRequestDTO dto) {
         UsuarioResponseDTO criado = usuarioService.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
@@ -38,7 +39,7 @@ public class UsuarioController {
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> update(
             @PathVariable Long id,
-            @RequestBody UsuarioRequestDTO dto) {
+            @Valid @RequestBody UsuarioRequestDTO dto) {
         UsuarioResponseDTO atualizado = usuarioService.update(id, dto);
         return ResponseEntity.ok(atualizado);
     }
@@ -48,5 +49,7 @@ public class UsuarioController {
         usuarioService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+
 
 }

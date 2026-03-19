@@ -4,6 +4,7 @@ import com.thyago.taskflow_api.dto.TarefaRequestDTO;
 import com.thyago.taskflow_api.dto.TarefaResponseDTO;
 import com.thyago.taskflow_api.entity.Tarefa;
 import com.thyago.taskflow_api.entity.Usuario;
+import com.thyago.taskflow_api.enums.StatusTarefa;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
 import com.thyago.taskflow_api.repository.TarefaRepository;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
@@ -82,7 +83,7 @@ public class TarefaService {
                 .toList();
     }
 
-    public TarefaResponseDTO atualizarStatus(Long id, String status) {
+    public TarefaResponseDTO atualizarStatus(Long id, StatusTarefa status) {
         Tarefa tarefa = tarefaRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
         tarefa.setStatus(status);

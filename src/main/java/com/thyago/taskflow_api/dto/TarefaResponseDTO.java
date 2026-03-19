@@ -1,5 +1,8 @@
 package com.thyago.taskflow_api.dto;
 
+import com.thyago.taskflow_api.enums.PrioridadeTarefa;
+import com.thyago.taskflow_api.enums.StatusTarefa;
+
 import java.time.LocalDate;
 
 public class TarefaResponseDTO {
@@ -7,8 +10,8 @@ public class TarefaResponseDTO {
     private Long id;
     private String titulo;
     private String descricao;
-    private String status;
-    private String prioridade;
+    private StatusTarefa status;
+    private PrioridadeTarefa prioridade;
     private LocalDate dataCriacao;
     private LocalDate dataValidade;
     private Long idUsuario;
@@ -37,22 +40,6 @@ public class TarefaResponseDTO {
         this.descricao = descricao;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getPrioridade() {
-        return prioridade;
-    }
-
-    public void setPrioridade(String prioridade) {
-        this.prioridade = prioridade;
-    }
-
     public LocalDate getDataCriacao() {
         return dataCriacao;
     }
@@ -75,5 +62,21 @@ public class TarefaResponseDTO {
 
     public void setIdUsuario(Long idUsuario) {
         this.idUsuario = idUsuario;
+    }
+
+    public StatusTarefa getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusTarefa status) {
+        this.status = status;
+    }
+
+    public PrioridadeTarefa getPrioridade() {
+        return prioridade;
+    }
+
+    public void setPrioridade(PrioridadeTarefa prioridade) {
+        this.prioridade = prioridade;
     }
 }

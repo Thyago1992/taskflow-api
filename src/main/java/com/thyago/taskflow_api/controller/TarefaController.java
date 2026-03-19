@@ -2,7 +2,9 @@ package com.thyago.taskflow_api.controller;
 
 import com.thyago.taskflow_api.dto.TarefaRequestDTO;
 import com.thyago.taskflow_api.dto.TarefaResponseDTO;
+import com.thyago.taskflow_api.enums.StatusTarefa;
 import com.thyago.taskflow_api.service.TarefaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +32,7 @@ public class TarefaController {
     }
 
     @PostMapping
-    public ResponseEntity<TarefaResponseDTO> save(@RequestBody TarefaRequestDTO dto) {
+    public ResponseEntity<TarefaResponseDTO> save(@Valid @RequestBody TarefaRequestDTO dto) {
         TarefaResponseDTO criado = tarefaService.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(criado);
     }
@@ -44,7 +46,7 @@ public class TarefaController {
     @PutMapping("/{id}")
     public ResponseEntity<TarefaResponseDTO> update(
             @PathVariable Long id,
-            @RequestBody TarefaRequestDTO dto) {
+            @Valid @RequestBody TarefaRequestDTO dto) {
         TarefaResponseDTO atualizado = tarefaService.update(id, dto);
         return ResponseEntity.ok(atualizado);
     }
@@ -53,5 +55,12 @@ public class TarefaController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         tarefaService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<TarefaResponseDTO> atualizarStatus(
+            @PathVariable Long id,
+            @RequestParam StatusTarefa status) {
+        return ResponseEntity.ok(tarefaService.atualizarStatus(id, status));
     }
 }
