@@ -43,7 +43,9 @@ public class UsuarioController {
     @Operation(description = "Cria um novo usuário no sistema com os dados fornecidos no corpo da requisição.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso."),
-            @ApiResponse(responseCode = "400", description = "Requisição inválida. Verifique os dados fornecidos.")
+            @ApiResponse(responseCode = "400", description = "Requisição inválida. Verifique os dados fornecidos."),
+            @ApiResponse(responseCode = "409", description = "Conflito. O email fornecido já está em uso por outro " +
+                    "usuário.")
     })
     @PostMapping
     public ResponseEntity<UsuarioResponseDTO> save(@Valid @RequestBody UsuarioRequestDTO dto) {

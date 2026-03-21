@@ -2,9 +2,17 @@ package com.thyago.taskflow_api.dto;
 
 import com.thyago.taskflow_api.enums.PrioridadeTarefa;
 import com.thyago.taskflow_api.enums.StatusTarefa;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TarefaResponseDTO {
 
     private Long id;
@@ -16,67 +24,4 @@ public class TarefaResponseDTO {
     private LocalDate dataValidade;
     private Long idUsuario;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public LocalDate getDataCriacao() {
-        return dataCriacao;
-    }
-
-    public void setDataCriacao(LocalDate dataCriacao) {
-        this.dataCriacao = dataCriacao;
-    }
-
-    public LocalDate getDataValidade() {
-        return dataValidade;
-    }
-
-    public void setDataValidade(LocalDate dataValidade) {
-        this.dataValidade = dataValidade;
-    }
-
-    public Long getIdUsuario() {
-        return idUsuario;
-    }
-
-    public void setIdUsuario(Long idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
-    public StatusTarefa getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusTarefa status) {
-        this.status = status;
-    }
-
-    public PrioridadeTarefa getPrioridade() {
-        return prioridade;
-    }
-
-    public void setPrioridade(PrioridadeTarefa prioridade) {
-        this.prioridade = prioridade;
-    }
 }

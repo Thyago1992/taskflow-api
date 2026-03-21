@@ -3,8 +3,10 @@ package com.thyago.taskflow_api.service;
 import com.thyago.taskflow_api.dto.UsuarioRequestDTO;
 import com.thyago.taskflow_api.dto.UsuarioResponseDTO;
 import com.thyago.taskflow_api.entity.Usuario;
+import com.thyago.taskflow_api.exception.EmailAlreadyExistsException;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,11 +17,13 @@ import java.util.List;
 @Service
 public class UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final ModelMapper modelMapper;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    public UsuarioService(UsuarioRepository usuarioRepository, ModelMapper modelMapper) {
+        this.usuarioRepository = usuarioRepository;
+        this.modelMapper = modelMapper;
+    }
 
     public List<UsuarioResponseDTO> findAll() {
         return usuarioRepository.findAll()
@@ -35,6 +39,9 @@ public class UsuarioService {
     }
 
     public UsuarioResponseDTO save(UsuarioRequestDTO dto) {
+        if (usuarioRepository.existsByEmail(dto.getEmail())) {
+            throw new EmailAlreadyExistsException("Email já cadastrado");
+        }
         Usuario usuario = modelMapper.map(dto, Usuario.class);
         usuario.setDataCriacao(LocalDateTime.now());
         Usuario salvo = usuarioRepository.save(usuario);
@@ -55,4 +62,6 @@ public class UsuarioService {
                 .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
         usuarioRepository.deleteById(id);
     }
+
+
 }

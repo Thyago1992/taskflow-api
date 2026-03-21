@@ -1,7 +1,14 @@
 package com.thyago.taskflow_api.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class ErroResponseDTO {
 
     private int status;
@@ -14,7 +21,4 @@ public class ErroResponseDTO {
         this.timestamp = LocalDateTime.now();
     }
 
-    public int getStatus() { return status; }
-    public String getMensagem() { return mensagem; }
-    public LocalDateTime getTimestamp() { return timestamp; }
 }

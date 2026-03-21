@@ -18,14 +18,17 @@ import java.util.List;
 @Service
 public class TarefaService {
 
-    @Autowired
-    private TarefaRepository tarefaRepository;
+    private final TarefaRepository tarefaRepository;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
+
+    public TarefaService(TarefaRepository tarefaRepository, UsuarioRepository usuarioRepository, ModelMapper modelMapper) {
+        this.tarefaRepository = tarefaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.modelMapper = modelMapper;
+    }
 
     public List<TarefaResponseDTO> findAll() {
         return tarefaRepository.findAll()
