@@ -54,7 +54,6 @@ public class TarefaService {
         tarefa.setPrioridade(dto.getPrioridade());
         tarefa.setDataValidade(dto.getDataValidade());
         tarefa.setUsuario(usuario);
-        tarefa.setDataCriacao(LocalDate.now());
 
         Tarefa salvo = tarefaRepository.save(tarefa);
         return modelMapper.map(salvo, TarefaResponseDTO.class);
@@ -64,11 +63,16 @@ public class TarefaService {
         Tarefa tarefa = tarefaRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
 
+        // Busca o novo usuário e atualiza o vínculo
+        Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
+                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
+
         tarefa.setTitulo(dto.getTitulo());
         tarefa.setDescricao(dto.getDescricao());
         tarefa.setStatus(dto.getStatus());
         tarefa.setPrioridade(dto.getPrioridade());
         tarefa.setDataValidade(dto.getDataValidade());
+        tarefa.setUsuario(usuario); // ← faltava isso
 
         Tarefa salvo = tarefaRepository.save(tarefa);
         return modelMapper.map(salvo, TarefaResponseDTO.class);
@@ -80,7 +84,10 @@ public class TarefaService {
     }
 
     public List<TarefaResponseDTO> findByUsuario(Long idUsuario) {
-        return tarefaRepository.findByUsuarioId(idUsuario) // ✅
+        usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
+
+        return tarefaRepository.findByUsuarioId(idUsuario)
                 .stream()
                 .map(tarefa -> modelMapper.map(tarefa, TarefaResponseDTO.class))
                 .toList();

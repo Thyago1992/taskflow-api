@@ -16,6 +16,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
     }
 
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErroResponseDTO> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
+        ErroResponseDTO erro = new ErroResponseDTO(409, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErroResponseDTO> handleValidacao(MethodArgumentNotValidException ex) {
         String mensagem = ex.getBindingResult()
@@ -30,12 +36,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErroResponseDTO> handleGenerico(Exception ex) {
         ErroResponseDTO erro = new ErroResponseDTO(500, "Erro interno no servidor");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(erro);
-    }
-
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<ErroResponseDTO> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
-        ErroResponseDTO erro = new ErroResponseDTO(409, ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
     }
 
 }

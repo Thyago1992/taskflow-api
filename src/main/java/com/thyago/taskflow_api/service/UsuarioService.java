@@ -43,7 +43,6 @@ public class UsuarioService {
             throw new EmailAlreadyExistsException("Email já cadastrado");
         }
         Usuario usuario = modelMapper.map(dto, Usuario.class);
-        usuario.setDataCriacao(LocalDateTime.now());
         Usuario salvo = usuarioRepository.save(usuario);
         return modelMapper.map(salvo, UsuarioResponseDTO.class);
     }
@@ -51,6 +50,13 @@ public class UsuarioService {
     public UsuarioResponseDTO update(Long id, UsuarioRequestDTO dto) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
+
+        // Verifica se o email pertence a OUTRO usuário
+        if (!usuario.getEmail().equals(dto.getEmail())
+                && usuarioRepository.existsByEmail(dto.getEmail())) {
+            throw new EmailAlreadyExistsException("Email já cadastrado");
+        }
+
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
         Usuario salvo = usuarioRepository.save(usuario);
