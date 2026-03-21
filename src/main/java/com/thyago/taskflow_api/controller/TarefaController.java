@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +18,11 @@ import java.util.List;
 @RequestMapping("/tarefas")
 public class TarefaController {
 
-    @Autowired
-    private TarefaService tarefaService;
+    private final TarefaService tarefaService;
+
+    public TarefaController(TarefaService tarefaService) {
+        this.tarefaService = tarefaService;
+    }
 
     @Operation(description = "Recupera a lista de todas as tarefas cadastradas no sistema.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Lista de tarefas retornada com sucesso.")})

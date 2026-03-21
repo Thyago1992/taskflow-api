@@ -18,8 +18,11 @@ import java.util.List;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
-    @Autowired
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
+
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
 
     @Operation(description = "Recupera a lista de todos os usuários cadastrados no sistema.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso.")})

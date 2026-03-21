@@ -6,12 +6,8 @@ import com.thyago.taskflow_api.entity.Usuario;
 import com.thyago.taskflow_api.exception.EmailAlreadyExistsException;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
