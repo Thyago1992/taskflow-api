@@ -35,7 +35,7 @@ class UsuarioServiceTest {
     // ======================== findAll ========================
 
     @Test
-    public void deveRetornarTodosUsuarios() {
+    void deveRetornarTodosUsuarios() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         UsuarioResponseDTO dto = new UsuarioResponseDTO(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
@@ -57,7 +57,7 @@ class UsuarioServiceTest {
     // ======================== findById ========================
 
     @Test
-    public void deveRetornarUsuarioPorId() {
+    void deveRetornarUsuarioPorId() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         UsuarioResponseDTO dto = new UsuarioResponseDTO(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
@@ -78,7 +78,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoQuandoUsuarioNaoEncontrado() {
+    void deveLancarExcecaoQuandoUsuarioNaoEncontrado() {
         // --- ARRANGE ---
         Mockito.when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -91,7 +91,7 @@ class UsuarioServiceTest {
     // ======================== save ========================
 
     @Test
-    public void deveSalvarUsuario() {
+    void deveSalvarUsuario() {
         // --- ARRANGE ---
         UsuarioRequestDTO request = new UsuarioRequestDTO("Carol", "carol@gmail.com");
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
@@ -115,7 +115,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoQuandoEmailJaCadastrado() {
+    void deveLancarExcecaoQuandoEmailJaCadastrado() {
         // --- ARRANGE ---
         UsuarioRequestDTO request = new UsuarioRequestDTO("Carol", "carol@gmail.com");
 
@@ -131,7 +131,7 @@ class UsuarioServiceTest {
     // ======================== update ========================
 
     @Test
-    public void deveAtualizarUsuario() {
+    void deveAtualizarUsuario() {
         // --- ARRANGE ---
         UsuarioRequestDTO request = new UsuarioRequestDTO("Carol Atualizada", "carol.nova@gmail.com");
         Usuario usuarioExistente = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
@@ -157,7 +157,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    public void deveAtualizarUsuarioSemMudarEmail() {
+    void deveAtualizarUsuarioSemMudarEmail() {
         // --- ARRANGE ---
         // Quando o email não muda, a verificação de duplicidade não deve ser chamada.
         UsuarioRequestDTO request = new UsuarioRequestDTO("Carol Atualizada", "carol@gmail.com");
@@ -182,9 +182,9 @@ class UsuarioServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoAoAtualizarComEmailDeOutroUsuario() {
+    void deveLancarExcecaoAoAtualizarComEmailDeOutroUsuario() {
         // --- ARRANGE ---
-        // Carol tenta mudar seu email para um que já pertence a outro usuário.
+        // Carol tenta mudar o seu email para um que já pertence a outro usuário.
         UsuarioRequestDTO request = new UsuarioRequestDTO("Carol", "outro@gmail.com");
         Usuario usuarioExistente = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
 
@@ -198,7 +198,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoAoAtualizarUsuarioNaoEncontrado() {
+    void deveLancarExcecaoAoAtualizarUsuarioNaoEncontrado() {
         // --- ARRANGE ---
         UsuarioRequestDTO request = new UsuarioRequestDTO("Carol", "carol@gmail.com");
 
@@ -213,7 +213,7 @@ class UsuarioServiceTest {
     // ======================== delete ========================
 
     @Test
-    public void deveDeletarUsuario() {
+    void deveDeletarUsuario() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
 
@@ -228,7 +228,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoAoDeletarUsuarioNaoEncontrado() {
+    void deveLancarExcecaoAoDeletarUsuarioNaoEncontrado() {
         // --- ARRANGE ---
         Mockito.when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 

@@ -36,13 +36,13 @@ public class TarefaService {
 
     public TarefaResponseDTO findById(Long id) {
         Tarefa tarefa = tarefaRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
+                .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_TAREFA_NAO_ENCONTRADA));
         return modelMapper.map(tarefa, TarefaResponseDTO.class);
     }
 
     public TarefaResponseDTO save(TarefaRequestDTO dto) {
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
-                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
         Tarefa tarefa = new Tarefa();
         tarefa.setTitulo(dto.getTitulo());
@@ -58,11 +58,11 @@ public class TarefaService {
 
     public TarefaResponseDTO update(Long id, TarefaRequestDTO dto) {
         Tarefa tarefa = tarefaRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
+                .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_TAREFA_NAO_ENCONTRADA));
 
         // Busca o novo usuário e atualiza o vínculo
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
-                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
         tarefa.setTitulo(dto.getTitulo());
         tarefa.setDescricao(dto.getDescricao());
@@ -76,13 +76,14 @@ public class TarefaService {
     }
 
     public void delete(Long id) {
-        tarefaRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
+        tarefaRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.
+                MSG_TAREFA_NAO_ENCONTRADA));
         tarefaRepository.deleteById(id);
     }
 
     public List<TarefaResponseDTO> findByUsuario(Long idUsuario) {
         usuarioRepository.findById(idUsuario)
-                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
         return tarefaRepository.findByUsuarioId(idUsuario)
                 .stream()
@@ -92,7 +93,7 @@ public class TarefaService {
 
     public TarefaResponseDTO atualizarStatus(Long id, StatusTarefa status) {
         Tarefa tarefa = tarefaRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException("Tarefa não encontrada"));
+                .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_TAREFA_NAO_ENCONTRADA));
         tarefa.setStatus(status);
         Tarefa salvo = tarefaRepository.save(tarefa);
         return modelMapper.map(salvo, TarefaResponseDTO.class);

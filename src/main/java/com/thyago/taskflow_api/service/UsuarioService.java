@@ -30,7 +30,7 @@ public class UsuarioService {
 
     public UsuarioResponseDTO findById(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
         return modelMapper.map(usuario, UsuarioResponseDTO.class);
     }
 
@@ -45,12 +45,12 @@ public class UsuarioService {
 
     public UsuarioResponseDTO update(Long id, UsuarioRequestDTO dto) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
         // Verifica se o email pertence a OUTRO usuário
         if (!usuario.getEmail().equals(dto.getEmail())
                 && usuarioRepository.existsByEmail(dto.getEmail())) {
-            throw new EmailAlreadyExistsException("Email já cadastrado");
+            throw new EmailAlreadyExistsException(EmailAlreadyExistsException.MSG_EMAIL_EXISTENTE);
         }
 
         usuario.setNome(dto.getNome());
@@ -61,7 +61,7 @@ public class UsuarioService {
 
     public void delete(Long id) {
         usuarioRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
         usuarioRepository.deleteById(id);
     }
 

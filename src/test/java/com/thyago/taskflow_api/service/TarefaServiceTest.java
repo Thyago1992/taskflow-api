@@ -42,7 +42,7 @@ class TarefaServiceTest {
     // ======================== findAll ========================
 
     @Test
-    public void deveRetornarTodasTarefas() {
+    void deveRetornarTodasTarefas() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         Tarefa tarefa = new Tarefa(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), usuario);
@@ -65,7 +65,7 @@ class TarefaServiceTest {
     // ======================== findById ========================
 
     @Test
-    public void deveRetornarTarefaPorId() {
+    void deveRetornarTarefaPorId() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         Tarefa tarefa = new Tarefa(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), usuario);
@@ -86,7 +86,7 @@ class TarefaServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoQuandoTarefaNaoEncontradaPorId() {
+    void deveLancarExcecaoQuandoTarefaNaoEncontradaPorId() {
         // --- ARRANGE ---
         Mockito.when(tarefaRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -99,7 +99,7 @@ class TarefaServiceTest {
     // ======================== save ========================
 
     @Test
-    public void deveSalvarTarefa() {
+    void deveSalvarTarefa() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         TarefaRequestDTO request = new TarefaRequestDTO("Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now().plusDays(7), 1L);
@@ -123,7 +123,7 @@ class TarefaServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoAoSalvarTarefaComUsuarioInexistente() {
+    void deveLancarExcecaoAoSalvarTarefaComUsuarioInexistente() {
         // --- ARRANGE ---
         TarefaRequestDTO request = new TarefaRequestDTO("Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now().plusDays(7), 99L);
 
@@ -138,7 +138,7 @@ class TarefaServiceTest {
     // ======================== update ========================
 
     @Test
-    public void deveAtualizarTarefa() {
+    void deveAtualizarTarefa() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         TarefaRequestDTO request = new TarefaRequestDTO("Tarefa Atualizada", "Nova descrição", StatusTarefa.EM_ANDAMENTO, PrioridadeTarefa.MEDIA, LocalDate.now().plusDays(10), 1L);
@@ -167,7 +167,7 @@ class TarefaServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoAoAtualizarTarefaNaoEncontrada() {
+    void deveLancarExcecaoAoAtualizarTarefaNaoEncontrada() {
         // --- ARRANGE ---
         TarefaRequestDTO request = new TarefaRequestDTO("Tarefa", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now().plusDays(7), 1L);
 
@@ -180,7 +180,7 @@ class TarefaServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoAoAtualizarTarefaComUsuarioInexistente() {
+    void deveLancarExcecaoAoAtualizarTarefaComUsuarioInexistente() {
         // --- ARRANGE ---
         // Tarefa existe, mas o novo idUsuario informado no DTO não existe.
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
@@ -199,7 +199,7 @@ class TarefaServiceTest {
     // ======================== delete ========================
 
     @Test
-    public void deveDeletarTarefa() {
+    void deveDeletarTarefa() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         Tarefa tarefa = new Tarefa(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), usuario);
@@ -215,7 +215,7 @@ class TarefaServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoAoDeletarTarefaNaoEncontrada() {
+    void deveLancarExcecaoAoDeletarTarefaNaoEncontrada() {
         // --- ARRANGE ---
         Mockito.when(tarefaRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -228,7 +228,7 @@ class TarefaServiceTest {
     // ======================== findByUsuario ========================
 
     @Test
-    public void deveRetornarTarefasPorUsuario() {
+    void deveRetornarTarefasPorUsuario() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         Tarefa tarefa = new Tarefa(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), usuario);
@@ -252,7 +252,7 @@ class TarefaServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoAoBuscarTarefasDeUsuarioInexistente() {
+    void deveLancarExcecaoAoBuscarTarefasDeUsuarioInexistente() {
         // --- ARRANGE ---
         Mockito.when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -266,7 +266,7 @@ class TarefaServiceTest {
     // ======================== atualizarStatus ========================
 
     @Test
-    public void deveAtualizarStatusDaTarefa() {
+    void deveAtualizarStatusDaTarefa() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         Tarefa tarefa = new Tarefa(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), usuario);
@@ -289,7 +289,7 @@ class TarefaServiceTest {
     }
 
     @Test
-    public void deveLancarExcecaoAoAtualizarStatusDeTarefaNaoEncontrada() {
+    void deveLancarExcecaoAoAtualizarStatusDeTarefaNaoEncontrada() {
         // --- ARRANGE ---
         Mockito.when(tarefaRepository.findById(99L)).thenReturn(Optional.empty());
 

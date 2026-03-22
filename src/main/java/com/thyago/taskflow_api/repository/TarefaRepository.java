@@ -11,4 +11,6 @@ public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
 
     List<Tarefa> findByUsuarioId (Long idUsuario);
 
+   //SELECT t FROM Tarefa t WHERE t.usuario.id = :idUsuario
+
 }
