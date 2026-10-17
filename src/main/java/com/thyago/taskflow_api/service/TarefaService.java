@@ -5,11 +5,14 @@ import com.thyago.taskflow_api.dto.TarefaResponseDTO;
 import com.thyago.taskflow_api.entity.Tarefa;
 import com.thyago.taskflow_api.entity.Usuario;
 import com.thyago.taskflow_api.enums.StatusTarefa;
+import com.thyago.taskflow_api.exception.DataValidadeInvalidaException;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
 import com.thyago.taskflow_api.repository.TarefaRepository;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -44,6 +47,8 @@ public class TarefaService {
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
+        validarDataValidade(dto.getDataValidade());
+
         // O status inicial é sempre PENDENTE (definido na entidade)
         Tarefa tarefa = new Tarefa();
         tarefa.setTitulo(dto.getTitulo());
@@ -62,6 +67,11 @@ public class TarefaService {
 
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
+
+        // Só valida a data se ela mudou: assim dá para editar uma tarefa que já está atrasada
+        if (!dto.getDataValidade().equals(tarefa.getDataValidade())) {
+            validarDataValidade(dto.getDataValidade());
+        }
 
         // Primeiro valida a transição, para falhar antes de alterar os outros campos
         tarefa.alterarStatus(dto.getStatus());
@@ -97,5 +107,11 @@ public class TarefaService {
         tarefa.alterarStatus(status);
         Tarefa salvo = tarefaRepository.save(tarefa);
         return modelMapper.map(salvo, TarefaResponseDTO.class);
+    }
+
+    private void validarDataValidade(LocalDate dataValidade) {
+        if (dataValidade.isBefore(LocalDate.now())) {
+            throw new DataValidadeInvalidaException();
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.thyago.taskflow_api.entity.Tarefa;
 import com.thyago.taskflow_api.entity.Usuario;
 import com.thyago.taskflow_api.enums.PrioridadeTarefa;
 import com.thyago.taskflow_api.enums.StatusTarefa;
+import com.thyago.taskflow_api.exception.DataValidadeInvalidaException;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
 import com.thyago.taskflow_api.repository.TarefaRepository;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
@@ -295,6 +296,22 @@ class TarefaServiceTest {
 
         // --- ACT + ASSERT ---
         assertThrows(ObjectNotFoundException.class, () -> tarefaService.atualizarStatus(99L, StatusTarefa.CONCLUIDA));
+
+        Mockito.verify(tarefaRepository, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
+    void deveLancarExcecaoAoSalvarComDataValidadeNoPassado() {
+        // --- ARRANGE ---
+        TarefaRequestDTO request = new TarefaRequestDTO(
+                "Estudar", "Revisar JPA", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA,
+                LocalDate.now().minusDays(1), 1L);
+        Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
+
+        Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+
+        // --- ACT + ASSERT ---
+        assertThrows(DataValidadeInvalidaException.class, () -> tarefaService.save(request));
 
         Mockito.verify(tarefaRepository, Mockito.never()).save(Mockito.any());
     }
