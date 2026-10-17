@@ -1,5 +1,6 @@
 package com.thyago.taskflow_api.service;
 
+import com.thyago.taskflow_api.dto.PaginaResponseDTO;
 import com.thyago.taskflow_api.dto.TarefaRequestDTO;
 import com.thyago.taskflow_api.dto.TarefaResponseDTO;
 import com.thyago.taskflow_api.entity.Tarefa;
@@ -10,6 +11,8 @@ import com.thyago.taskflow_api.exception.ObjectNotFoundException;
 import com.thyago.taskflow_api.mapper.TarefaMapper;
 import com.thyago.taskflow_api.repository.TarefaRepository;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -40,11 +43,14 @@ public class TarefaService {
         this.clock = clock;
     }
 
-    public List<TarefaResponseDTO> findAll() {
-        return tarefaRepository.findAll()
-                .stream()
-                .map(tarefaMapper::toResponse)
-                .toList();
+    public PaginaResponseDTO<TarefaResponseDTO> findAll(StatusTarefa status, Pageable pageable) {
+        Page<Tarefa> pagina;
+        if (status == null) {
+            pagina = tarefaRepository.findAll(pageable);
+        } else {
+            pagina = tarefaRepository.findByStatus(status, pageable);
+        }
+        return PaginaResponseDTO.de(pagina.map(tarefaMapper::toResponse));
     }
 
     public TarefaResponseDTO findById(Long id) {

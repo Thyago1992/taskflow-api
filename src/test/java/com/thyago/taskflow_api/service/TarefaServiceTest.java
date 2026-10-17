@@ -27,6 +27,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import com.thyago.taskflow_api.dto.PaginaResponseDTO;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class TarefaServiceTest {
@@ -51,24 +55,48 @@ class TarefaServiceTest {
     // ======================== findAll ========================
 
     @Test
-    void deveRetornarTodasTarefas() {
+    void deveRetornarTodasTarefasPaginadas() {
         // --- ARRANGE ---
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         Tarefa tarefa = new Tarefa(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), usuario);
         TarefaResponseDTO dto = new TarefaResponseDTO(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), 1L);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(tarefaRepository.findAll()).thenReturn(List.of(tarefa));
+        Mockito.when(tarefaRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(tarefa), pageable, 1));
         Mockito.when(tarefaMapper.toResponse(tarefa)).thenReturn(dto);
 
         // --- ACT ---
-        List<TarefaResponseDTO> resultado = tarefaService.findAll();
+        PaginaResponseDTO<TarefaResponseDTO> resultado = tarefaService.findAll(null, pageable);
 
         // --- ASSERT ---
-        assertNotNull(resultado);
-        assertEquals(1, resultado.size());
-        assertEquals("Tarefa 1", resultado.get(0).titulo());
+        assertEquals(1, resultado.conteudo().size());
+        assertEquals("Tarefa 1", resultado.conteudo().get(0).titulo());
+        assertEquals(1, resultado.totalElementos());
+        assertEquals(1, resultado.totalPaginas());
 
-        Mockito.verify(tarefaRepository, Mockito.times(1)).findAll();
+        Mockito.verify(tarefaRepository, Mockito.never()).findByStatus(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    void deveFiltrarTarefasPorStatus() {
+        // --- ARRANGE ---
+        Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
+        Tarefa tarefa = new Tarefa(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), usuario);
+        TarefaResponseDTO dto = new TarefaResponseDTO(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), 1L);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Mockito.when(tarefaRepository.findByStatus(StatusTarefa.PENDENTE, pageable))
+                .thenReturn(new PageImpl<>(List.of(tarefa), pageable, 1));
+        Mockito.when(tarefaMapper.toResponse(tarefa)).thenReturn(dto);
+
+        // --- ACT ---
+        PaginaResponseDTO<TarefaResponseDTO> resultado = tarefaService.findAll(StatusTarefa.PENDENTE, pageable);
+
+        // --- ASSERT ---
+        assertEquals(1, resultado.conteudo().size());
+        assertEquals(StatusTarefa.PENDENTE, resultado.conteudo().get(0).status());
+
+        Mockito.verify(tarefaRepository, Mockito.never()).findAll(Mockito.any(Pageable.class));
     }
 
     // ======================== findById ========================

@@ -3,6 +3,7 @@ package com.thyago.taskflow_api.exception;
 import com.thyago.taskflow_api.dto.ErroResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -48,6 +49,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErroResponseDTO> handleGenerico(Exception ex) {
         log.error("Erro inesperado: ", ex);
         return resposta(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno no servidor");
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ErroResponseDTO> handleCampoOrdenacaoInvalido(PropertyReferenceException ex) {
+        return resposta(HttpStatus.BAD_REQUEST, "Campo de ordenação inválido: '" + ex.getPropertyName() + "'");
     }
 
     private ResponseEntity<ErroResponseDTO> resposta(HttpStatus status, String mensagem) {

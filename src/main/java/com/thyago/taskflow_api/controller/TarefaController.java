@@ -1,5 +1,6 @@
 package com.thyago.taskflow_api.controller;
 
+import com.thyago.taskflow_api.dto.PaginaResponseDTO;
 import com.thyago.taskflow_api.dto.TarefaRequestDTO;
 import com.thyago.taskflow_api.dto.TarefaResponseDTO;
 import com.thyago.taskflow_api.enums.StatusTarefa;
@@ -8,6 +9,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,12 +28,16 @@ public class TarefaController {
         this.tarefaService = tarefaService;
     }
 
-    @Operation(description = "Recupera a lista de todas as tarefas cadastradas no sistema.")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Lista de tarefas retornada com sucesso.")})
+    @Operation(description = "Recupera as tarefas de forma paginada, com filtro opcional por status.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Página de tarefas retornada com sucesso."),
+            @ApiResponse(responseCode = "400", description = "Status ou campo de ordenação inválido.")
+    })
     @GetMapping
-    public ResponseEntity<List<TarefaResponseDTO>> findAll() {
-        List<TarefaResponseDTO> tarefas = tarefaService.findAll();
-        return ResponseEntity.ok(tarefas);
+    public ResponseEntity<PaginaResponseDTO<TarefaResponseDTO>> findAll(
+            @RequestParam(required = false) StatusTarefa status,
+            @ParameterObject @PageableDefault(size = 10, sort = "dataValidade") Pageable pageable) {
+        return ResponseEntity.ok(tarefaService.findAll(status, pageable));
     }
 
     @Operation(description = "Recupera os detalhes de uma tarefa específica com base no ID fornecido.")
