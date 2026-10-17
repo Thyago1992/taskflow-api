@@ -7,13 +7,14 @@ import com.thyago.taskflow_api.entity.Usuario;
 import com.thyago.taskflow_api.enums.StatusTarefa;
 import com.thyago.taskflow_api.exception.DataValidadeInvalidaException;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
+import com.thyago.taskflow_api.mapper.TarefaMapper;
 import com.thyago.taskflow_api.repository.TarefaRepository;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.time.Clock;
 
 @Service
 public class TarefaService {
@@ -22,25 +23,31 @@ public class TarefaService {
 
     private final UsuarioRepository usuarioRepository;
 
-    private final ModelMapper modelMapper;
+    private final TarefaMapper tarefaMapper;
 
-    public TarefaService(TarefaRepository tarefaRepository, UsuarioRepository usuarioRepository, ModelMapper modelMapper) {
+    private final Clock clock;
+
+    public TarefaService(TarefaRepository tarefaRepository,
+                         UsuarioRepository usuarioRepository,
+                         TarefaMapper tarefaMapper,
+                         Clock clock) {
         this.tarefaRepository = tarefaRepository;
         this.usuarioRepository = usuarioRepository;
-        this.modelMapper = modelMapper;
+        this.tarefaMapper = tarefaMapper;
+        this.clock = clock;
     }
 
     public List<TarefaResponseDTO> findAll() {
         return tarefaRepository.findAll()
                 .stream()
-                .map(tarefa -> modelMapper.map(tarefa, TarefaResponseDTO.class))
+                .map(tarefaMapper::toResponse)
                 .toList();
     }
 
     public TarefaResponseDTO findById(Long id) {
         Tarefa tarefa = tarefaRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_TAREFA_NAO_ENCONTRADA));
-        return modelMapper.map(tarefa, TarefaResponseDTO.class);
+        return tarefaMapper.toResponse(tarefa);
     }
 
     public TarefaResponseDTO save(TarefaRequestDTO dto) {
@@ -51,14 +58,10 @@ public class TarefaService {
 
         // O status inicial é sempre PENDENTE (definido na entidade)
         Tarefa tarefa = new Tarefa();
-        tarefa.setTitulo(dto.getTitulo());
-        tarefa.setDescricao(dto.getDescricao());
-        tarefa.setPrioridade(dto.getPrioridade());
-        tarefa.setDataValidade(dto.getDataValidade());
-        tarefa.setUsuario(usuario);
+        tarefaMapper.preencher(tarefa, dto, usuario);
 
         Tarefa salvo = tarefaRepository.save(tarefa);
-        return modelMapper.map(salvo, TarefaResponseDTO.class);
+        return tarefaMapper.toResponse(salvo);
     }
 
     public TarefaResponseDTO update(Long id, TarefaRequestDTO dto) {
@@ -75,14 +78,10 @@ public class TarefaService {
 
         // Primeiro valida a transição, para falhar antes de alterar os outros campos
         tarefa.alterarStatus(dto.getStatus());
-        tarefa.setTitulo(dto.getTitulo());
-        tarefa.setDescricao(dto.getDescricao());
-        tarefa.setPrioridade(dto.getPrioridade());
-        tarefa.setDataValidade(dto.getDataValidade());
-        tarefa.setUsuario(usuario);
+        tarefaMapper.preencher(tarefa, dto, usuario);
 
         Tarefa salvo = tarefaRepository.save(tarefa);
-        return modelMapper.map(salvo, TarefaResponseDTO.class);
+        return tarefaMapper.toResponse(salvo);
     }
 
     public void delete(Long id) {
@@ -97,7 +96,7 @@ public class TarefaService {
 
         return tarefaRepository.findByUsuarioId(idUsuario)
                 .stream()
-                .map(tarefa -> modelMapper.map(tarefa, TarefaResponseDTO.class))
+                .map(tarefaMapper::toResponse)
                 .toList();
     }
 
@@ -106,11 +105,11 @@ public class TarefaService {
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_TAREFA_NAO_ENCONTRADA));
         tarefa.alterarStatus(status);
         Tarefa salvo = tarefaRepository.save(tarefa);
-        return modelMapper.map(salvo, TarefaResponseDTO.class);
+        return tarefaMapper.toResponse(salvo);
     }
 
     private void validarDataValidade(LocalDate dataValidade) {
-        if (dataValidade.isBefore(LocalDate.now())) {
+        if (dataValidade.isBefore(LocalDate.now(clock))) {
             throw new DataValidadeInvalidaException();
         }
     }

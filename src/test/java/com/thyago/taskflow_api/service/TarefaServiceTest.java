@@ -8,18 +8,21 @@ import com.thyago.taskflow_api.enums.PrioridadeTarefa;
 import com.thyago.taskflow_api.enums.StatusTarefa;
 import com.thyago.taskflow_api.exception.DataValidadeInvalidaException;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
+import com.thyago.taskflow_api.exception.TransicaoStatusInvalidaException;
+import com.thyago.taskflow_api.mapper.TarefaMapper;
 import com.thyago.taskflow_api.repository.TarefaRepository;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class TarefaServiceTest {
 
-    @InjectMocks
     private TarefaService tarefaService;
 
     @Mock
@@ -38,7 +40,13 @@ class TarefaServiceTest {
     private UsuarioRepository usuarioRepository;
 
     @Mock
-    private ModelMapper modelMapper;
+    private TarefaMapper tarefaMapper;
+
+    @BeforeEach
+    void setUp() {
+        Clock clock = Clock.system(ZoneId.of("America/Sao_Paulo"));
+        tarefaService = new TarefaService(tarefaRepository, usuarioRepository, tarefaMapper, clock);
+    }
 
     // ======================== findAll ========================
 
@@ -50,7 +58,7 @@ class TarefaServiceTest {
         TarefaResponseDTO dto = new TarefaResponseDTO(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), 1L);
 
         Mockito.when(tarefaRepository.findAll()).thenReturn(List.of(tarefa));
-        Mockito.when(modelMapper.map(tarefa, TarefaResponseDTO.class)).thenReturn(dto);
+        Mockito.when(tarefaMapper.toResponse(tarefa)).thenReturn(dto);
 
         // --- ACT ---
         List<TarefaResponseDTO> resultado = tarefaService.findAll();
@@ -73,7 +81,7 @@ class TarefaServiceTest {
         TarefaResponseDTO dto = new TarefaResponseDTO(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), 1L);
 
         Mockito.when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
-        Mockito.when(modelMapper.map(tarefa, TarefaResponseDTO.class)).thenReturn(dto);
+        Mockito.when(tarefaMapper.toResponse(tarefa)).thenReturn(dto);
 
         // --- ACT ---
         TarefaResponseDTO resultado = tarefaService.findById(1L);
@@ -109,7 +117,7 @@ class TarefaServiceTest {
 
         Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         Mockito.when(tarefaRepository.save(Mockito.any(Tarefa.class))).thenReturn(tarefaSalva);
-        Mockito.when(modelMapper.map(tarefaSalva, TarefaResponseDTO.class)).thenReturn(dto);
+        Mockito.when(tarefaMapper.toResponse(tarefaSalva)).thenReturn(dto);
 
         // --- ACT ---
         TarefaResponseDTO resultado = tarefaService.save(request);
@@ -120,6 +128,8 @@ class TarefaServiceTest {
         assertEquals(1L, resultado.getIdUsuario());
 
         Mockito.verify(usuarioRepository, Mockito.times(1)).findById(1L);
+        Mockito.verify(tarefaMapper, Mockito.times(1))
+                .preencher(Mockito.any(Tarefa.class), Mockito.eq(request), Mockito.eq(usuario));
         Mockito.verify(tarefaRepository, Mockito.times(1)).save(Mockito.any(Tarefa.class));
     }
 
@@ -132,6 +142,22 @@ class TarefaServiceTest {
 
         // --- ACT + ASSERT ---
         assertThrows(ObjectNotFoundException.class, () -> tarefaService.save(request));
+
+        Mockito.verify(tarefaRepository, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
+    void deveLancarExcecaoAoSalvarComDataValidadeNoPassado() {
+        // --- ARRANGE ---
+        TarefaRequestDTO request = new TarefaRequestDTO(
+                "Estudar", "Revisar JPA", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA,
+                LocalDate.now().minusDays(1), 1L);
+        Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
+
+        Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+
+        // --- ACT + ASSERT ---
+        assertThrows(DataValidadeInvalidaException.class, () -> tarefaService.save(request));
 
         Mockito.verify(tarefaRepository, Mockito.never()).save(Mockito.any());
     }
@@ -149,10 +175,9 @@ class TarefaServiceTest {
         TarefaResponseDTO dto = new TarefaResponseDTO(1L, "Tarefa Atualizada", "Nova descrição", StatusTarefa.EM_ANDAMENTO, PrioridadeTarefa.MEDIA, LocalDate.now(), LocalDate.now().plusDays(10), 1L);
 
         Mockito.when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefaExistente));
-        // update() agora busca o usuário — precisa estar mockado
         Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         Mockito.when(tarefaRepository.save(tarefaExistente)).thenReturn(tarefaSalva);
-        Mockito.when(modelMapper.map(tarefaSalva, TarefaResponseDTO.class)).thenReturn(dto);
+        Mockito.when(tarefaMapper.toResponse(tarefaSalva)).thenReturn(dto);
 
         // --- ACT ---
         TarefaResponseDTO resultado = tarefaService.update(1L, request);
@@ -161,9 +186,35 @@ class TarefaServiceTest {
         assertNotNull(resultado);
         assertEquals("Tarefa Atualizada", resultado.getTitulo());
         assertEquals(StatusTarefa.EM_ANDAMENTO, resultado.getStatus());
+        // O status da entidade foi alterado pela regra de transição
+        assertEquals(StatusTarefa.EM_ANDAMENTO, tarefaExistente.getStatus());
 
         Mockito.verify(tarefaRepository, Mockito.times(1)).findById(1L);
         Mockito.verify(usuarioRepository, Mockito.times(1)).findById(1L);
+        Mockito.verify(tarefaMapper, Mockito.times(1)).preencher(tarefaExistente, request, usuario);
+        Mockito.verify(tarefaRepository, Mockito.times(1)).save(tarefaExistente);
+    }
+
+    @Test
+    void devePermitirAtualizarTarefaAtrasadaSemMudarDataValidade() {
+        // --- ARRANGE ---
+        // A data de validade já passou, mas como não muda, a edição deve ser aceita.
+        Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
+        LocalDate dataVencida = LocalDate.now().minusDays(5);
+        TarefaRequestDTO request = new TarefaRequestDTO("Novo título", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, dataVencida, 1L);
+        Tarefa tarefaExistente = new Tarefa(1L, "Tarefa", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now().minusDays(10), dataVencida, usuario);
+        TarefaResponseDTO dto = new TarefaResponseDTO(1L, "Novo título", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now().minusDays(10), dataVencida, 1L);
+
+        Mockito.when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefaExistente));
+        Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        Mockito.when(tarefaRepository.save(tarefaExistente)).thenReturn(tarefaExistente);
+        Mockito.when(tarefaMapper.toResponse(tarefaExistente)).thenReturn(dto);
+
+        // --- ACT ---
+        TarefaResponseDTO resultado = tarefaService.update(1L, request);
+
+        // --- ASSERT ---
+        assertEquals("Novo título", resultado.getTitulo());
         Mockito.verify(tarefaRepository, Mockito.times(1)).save(tarefaExistente);
     }
 
@@ -235,10 +286,9 @@ class TarefaServiceTest {
         Tarefa tarefa = new Tarefa(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), usuario);
         TarefaResponseDTO dto = new TarefaResponseDTO(1L, "Tarefa 1", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), 1L);
 
-        // findByUsuario() agora valida se o usuário existe — precisa estar mockado
         Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         Mockito.when(tarefaRepository.findByUsuarioId(1L)).thenReturn(List.of(tarefa));
-        Mockito.when(modelMapper.map(tarefa, TarefaResponseDTO.class)).thenReturn(dto);
+        Mockito.when(tarefaMapper.toResponse(tarefa)).thenReturn(dto);
 
         // --- ACT ---
         List<TarefaResponseDTO> resultado = tarefaService.findByUsuario(1L);
@@ -276,7 +326,7 @@ class TarefaServiceTest {
 
         Mockito.when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
         Mockito.when(tarefaRepository.save(tarefa)).thenReturn(tarefaSalva);
-        Mockito.when(modelMapper.map(tarefaSalva, TarefaResponseDTO.class)).thenReturn(dto);
+        Mockito.when(tarefaMapper.toResponse(tarefaSalva)).thenReturn(dto);
 
         // --- ACT ---
         TarefaResponseDTO resultado = tarefaService.atualizarStatus(1L, StatusTarefa.CONCLUIDA);
@@ -301,17 +351,17 @@ class TarefaServiceTest {
     }
 
     @Test
-    void deveLancarExcecaoAoSalvarComDataValidadeNoPassado() {
+    void deveLancarExcecaoAoAtualizarStatusComTransicaoInvalida() {
         // --- ARRANGE ---
-        TarefaRequestDTO request = new TarefaRequestDTO(
-                "Estudar", "Revisar JPA", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA,
-                LocalDate.now().minusDays(1), 1L);
+        // Tarefa já concluída não pode voltar para pendente.
         Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
+        Tarefa tarefa = new Tarefa(1L, "Tarefa 1", "Descrição", StatusTarefa.CONCLUIDA, PrioridadeTarefa.ALTA, LocalDate.now(), LocalDate.now().plusDays(7), usuario);
 
-        Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        Mockito.when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
 
         // --- ACT + ASSERT ---
-        assertThrows(DataValidadeInvalidaException.class, () -> tarefaService.save(request));
+        assertThrows(TransicaoStatusInvalidaException.class,
+                () -> tarefaService.atualizarStatus(1L, StatusTarefa.PENDENTE));
 
         Mockito.verify(tarefaRepository, Mockito.never()).save(Mockito.any());
     }

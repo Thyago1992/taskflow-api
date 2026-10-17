@@ -1,0 +1,31 @@
+package com.thyago.taskflow_api.mapper;
+
+import com.thyago.taskflow_api.dto.TarefaRequestDTO;
+import com.thyago.taskflow_api.dto.TarefaResponseDTO;
+import com.thyago.taskflow_api.entity.Tarefa;
+import com.thyago.taskflow_api.entity.Usuario;
+import org.springframework.stereotype.Component;
+
+@Component
+public class TarefaMapper {
+
+    public void preencher(Tarefa tarefa, TarefaRequestDTO dto, Usuario usuario) {
+        tarefa.setTitulo(dto.getTitulo());
+        tarefa.setDescricao(dto.getDescricao());
+        tarefa.setPrioridade(dto.getPrioridade());
+        tarefa.setDataValidade(dto.getDataValidade());
+        tarefa.setUsuario(usuario);
+    }
+
+    public TarefaResponseDTO toResponse(Tarefa tarefa) {
+        return new TarefaResponseDTO(
+                tarefa.getId(),
+                tarefa.getTitulo(),
+                tarefa.getDescricao(),
+                tarefa.getStatus(),
+                tarefa.getPrioridade(),
+                tarefa.getDataCriacao(),
+                tarefa.getDataValidade(),
+                tarefa.getUsuario().getId());
+    }
+}

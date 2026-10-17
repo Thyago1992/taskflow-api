@@ -6,15 +6,16 @@ import com.thyago.taskflow_api.entity.Usuario;
 import com.thyago.taskflow_api.exception.EmailAlreadyExistsException;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
 import com.thyago.taskflow_api.exception.UsuarioPossuiTarefasException;
+import com.thyago.taskflow_api.mapper.UsuarioMapper;
 import com.thyago.taskflow_api.repository.TarefaRepository;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,7 +36,7 @@ class UsuarioServiceTest {
     private TarefaRepository tarefaRepository;
 
     @Mock
-    private ModelMapper modelMapper;
+    private UsuarioMapper usuarioMapper;
 
     // ======================== findAll ========================
 
@@ -46,7 +47,7 @@ class UsuarioServiceTest {
         UsuarioResponseDTO dto = new UsuarioResponseDTO(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
 
         Mockito.when(usuarioRepository.findAll()).thenReturn(List.of(usuario));
-        Mockito.when(modelMapper.map(usuario, UsuarioResponseDTO.class)).thenReturn(dto);
+        Mockito.when(usuarioMapper.toResponse(usuario)).thenReturn(dto);
 
         // --- ACT ---
         List<UsuarioResponseDTO> usuarios = usuarioService.findAll();
@@ -68,7 +69,7 @@ class UsuarioServiceTest {
         UsuarioResponseDTO dto = new UsuarioResponseDTO(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
 
         Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-        Mockito.when(modelMapper.map(usuario, UsuarioResponseDTO.class)).thenReturn(dto);
+        Mockito.when(usuarioMapper.toResponse(usuario)).thenReturn(dto);
 
         // --- ACT ---
         UsuarioResponseDTO resultado = usuarioService.findById(1L);
@@ -99,13 +100,12 @@ class UsuarioServiceTest {
     void deveSalvarUsuario() {
         // --- ARRANGE ---
         UsuarioRequestDTO request = new UsuarioRequestDTO("Carol", "carol@gmail.com");
-        Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
+        Usuario usuarioSalvo = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         UsuarioResponseDTO dto = new UsuarioResponseDTO(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
 
         Mockito.when(usuarioRepository.existsByEmail("carol@gmail.com")).thenReturn(false);
-        Mockito.when(modelMapper.map(request, Usuario.class)).thenReturn(usuario);
-        Mockito.when(usuarioRepository.save(usuario)).thenReturn(usuario);
-        Mockito.when(modelMapper.map(usuario, UsuarioResponseDTO.class)).thenReturn(dto);
+        Mockito.when(usuarioRepository.save(Mockito.any(Usuario.class))).thenReturn(usuarioSalvo);
+        Mockito.when(usuarioMapper.toResponse(usuarioSalvo)).thenReturn(dto);
 
         // --- ACT ---
         UsuarioResponseDTO resultado = usuarioService.save(request);
@@ -116,7 +116,7 @@ class UsuarioServiceTest {
         assertEquals("carol@gmail.com", resultado.getEmail());
 
         Mockito.verify(usuarioRepository, Mockito.times(1)).existsByEmail("carol@gmail.com");
-        Mockito.verify(usuarioRepository, Mockito.times(1)).save(usuario);
+        Mockito.verify(usuarioRepository, Mockito.times(1)).save(Mockito.any(Usuario.class));
     }
 
     @Test
@@ -124,20 +124,19 @@ class UsuarioServiceTest {
         // --- ARRANGE ---
         // O email chega com maiúsculas e espaços, mas deve ser salvo normalizado.
         UsuarioRequestDTO request = new UsuarioRequestDTO("Carol", "  Carol@Gmail.COM ");
-        Usuario usuario = new Usuario(1L, "Carol", "  Carol@Gmail.COM ", LocalDateTime.now());
-        UsuarioResponseDTO dto = new UsuarioResponseDTO(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
+        Usuario usuarioSalvo = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
 
         Mockito.when(usuarioRepository.existsByEmail("carol@gmail.com")).thenReturn(false);
-        Mockito.when(modelMapper.map(request, Usuario.class)).thenReturn(usuario);
-        Mockito.when(usuarioRepository.save(usuario)).thenReturn(usuario);
-        Mockito.when(modelMapper.map(usuario, UsuarioResponseDTO.class)).thenReturn(dto);
+        Mockito.when(usuarioRepository.save(Mockito.any(Usuario.class))).thenReturn(usuarioSalvo);
 
         // --- ACT ---
         usuarioService.save(request);
 
         // --- ASSERT ---
-        assertEquals("carol@gmail.com", usuario.getEmail());
-        Mockito.verify(usuarioRepository, Mockito.times(1)).existsByEmail("carol@gmail.com");
+        ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+        Mockito.verify(usuarioRepository).save(captor.capture());
+        assertEquals("carol@gmail.com", captor.getValue().getEmail());
+        assertEquals("Carol", captor.getValue().getNome());
     }
 
     @Test
@@ -168,7 +167,7 @@ class UsuarioServiceTest {
         // Verifica se o novo email já pertence a OUTRO usuário (id diferente de 1).
         Mockito.when(usuarioRepository.existsByEmailAndIdNot("carol.nova@gmail.com", 1L)).thenReturn(false);
         Mockito.when(usuarioRepository.save(usuarioExistente)).thenReturn(usuarioSalvo);
-        Mockito.when(modelMapper.map(usuarioSalvo, UsuarioResponseDTO.class)).thenReturn(dto);
+        Mockito.when(usuarioMapper.toResponse(usuarioSalvo)).thenReturn(dto);
 
         // --- ACT ---
         UsuarioResponseDTO resultado = usuarioService.update(1L, request);
@@ -194,7 +193,7 @@ class UsuarioServiceTest {
         Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioExistente));
         Mockito.when(usuarioRepository.existsByEmailAndIdNot("carol@gmail.com", 1L)).thenReturn(false);
         Mockito.when(usuarioRepository.save(usuarioExistente)).thenReturn(usuarioSalvo);
-        Mockito.when(modelMapper.map(usuarioSalvo, UsuarioResponseDTO.class)).thenReturn(dto);
+        Mockito.when(usuarioMapper.toResponse(usuarioSalvo)).thenReturn(dto);
 
         // --- ACT ---
         UsuarioResponseDTO resultado = usuarioService.update(1L, request);
