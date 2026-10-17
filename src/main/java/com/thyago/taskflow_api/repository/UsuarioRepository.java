@@ -9,6 +9,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     boolean existsByEmail(String email);
 
-    //SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Usuario u WHERE u.email = :email
+    boolean existsByEmailAndIdNot(String email, Long id);
 
 }

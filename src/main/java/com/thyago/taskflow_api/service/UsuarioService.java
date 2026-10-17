@@ -5,6 +5,8 @@ import com.thyago.taskflow_api.dto.UsuarioResponseDTO;
 import com.thyago.taskflow_api.entity.Usuario;
 import com.thyago.taskflow_api.exception.EmailAlreadyExistsException;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
+import com.thyago.taskflow_api.exception.UsuarioPossuiTarefasException;
+import com.thyago.taskflow_api.repository.TarefaRepository;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -14,10 +16,14 @@ import java.util.List;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final TarefaRepository tarefaRepository;
     private final ModelMapper modelMapper;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, ModelMapper modelMapper) {
+    public UsuarioService(UsuarioRepository usuarioRepository,
+                          TarefaRepository tarefaRepository,
+                          ModelMapper modelMapper) {
         this.usuarioRepository = usuarioRepository;
+        this.tarefaRepository = tarefaRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -35,10 +41,12 @@ public class UsuarioService {
     }
 
     public UsuarioResponseDTO save(UsuarioRequestDTO dto) {
-        if (usuarioRepository.existsByEmail(dto.getEmail())) {
+        String email = normalizar(dto.getEmail());
+        if (usuarioRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException();
         }
         Usuario usuario = modelMapper.map(dto, Usuario.class);
+        usuario.setEmail(email);
         Usuario salvo = usuarioRepository.save(usuario);
         return modelMapper.map(salvo, UsuarioResponseDTO.class);
     }
@@ -47,22 +55,29 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
-        // Verifica se o email pertence a OUTRO usuário
-        if (!usuario.getEmail().equals(dto.getEmail())
-                && usuarioRepository.existsByEmail(dto.getEmail())) {
+        String email = normalizar(dto.getEmail());
+        if (usuarioRepository.existsByEmailAndIdNot(email, id)) {
             throw new EmailAlreadyExistsException();
         }
 
         usuario.setNome(dto.getNome());
-        usuario.setEmail(dto.getEmail());
+        usuario.setEmail(email);
         Usuario salvo = usuarioRepository.save(usuario);
         return modelMapper.map(salvo, UsuarioResponseDTO.class);
     }
 
     public void delete(Long id) {
-        usuarioRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
+        if (!usuarioRepository.existsById(id)) {
+            throw new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO);
+        }
+        if (tarefaRepository.existsByUsuarioId(id)) {
+            throw new UsuarioPossuiTarefasException();
+        }
         usuarioRepository.deleteById(id);
+    }
+
+    private String normalizar(String email) {
+        return email.trim().toLowerCase();
     }
 
 }

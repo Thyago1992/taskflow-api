@@ -5,6 +5,8 @@ import com.thyago.taskflow_api.dto.UsuarioResponseDTO;
 import com.thyago.taskflow_api.entity.Usuario;
 import com.thyago.taskflow_api.exception.EmailAlreadyExistsException;
 import com.thyago.taskflow_api.exception.ObjectNotFoundException;
+import com.thyago.taskflow_api.exception.UsuarioPossuiTarefasException;
+import com.thyago.taskflow_api.repository.TarefaRepository;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,9 @@ class UsuarioServiceTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private TarefaRepository tarefaRepository;
 
     @Mock
     private ModelMapper modelMapper;
@@ -115,6 +120,27 @@ class UsuarioServiceTest {
     }
 
     @Test
+    void deveNormalizarEmailAoSalvar() {
+        // --- ARRANGE ---
+        // O email chega com maiúsculas e espaços, mas deve ser salvo normalizado.
+        UsuarioRequestDTO request = new UsuarioRequestDTO("Carol", "  Carol@Gmail.COM ");
+        Usuario usuario = new Usuario(1L, "Carol", "  Carol@Gmail.COM ", LocalDateTime.now());
+        UsuarioResponseDTO dto = new UsuarioResponseDTO(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
+
+        Mockito.when(usuarioRepository.existsByEmail("carol@gmail.com")).thenReturn(false);
+        Mockito.when(modelMapper.map(request, Usuario.class)).thenReturn(usuario);
+        Mockito.when(usuarioRepository.save(usuario)).thenReturn(usuario);
+        Mockito.when(modelMapper.map(usuario, UsuarioResponseDTO.class)).thenReturn(dto);
+
+        // --- ACT ---
+        usuarioService.save(request);
+
+        // --- ASSERT ---
+        assertEquals("carol@gmail.com", usuario.getEmail());
+        Mockito.verify(usuarioRepository, Mockito.times(1)).existsByEmail("carol@gmail.com");
+    }
+
+    @Test
     void deveLancarExcecaoQuandoEmailJaCadastrado() {
         // --- ARRANGE ---
         UsuarioRequestDTO request = new UsuarioRequestDTO("Carol", "carol@gmail.com");
@@ -139,8 +165,8 @@ class UsuarioServiceTest {
         UsuarioResponseDTO dto = new UsuarioResponseDTO(1L, "Carol Atualizada", "carol.nova@gmail.com", LocalDateTime.now());
 
         Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioExistente));
-        // Email mudou, então verifica se o novo já pertence a outro usuário.
-        Mockito.when(usuarioRepository.existsByEmail("carol.nova@gmail.com")).thenReturn(false);
+        // Verifica se o novo email já pertence a OUTRO usuário (id diferente de 1).
+        Mockito.when(usuarioRepository.existsByEmailAndIdNot("carol.nova@gmail.com", 1L)).thenReturn(false);
         Mockito.when(usuarioRepository.save(usuarioExistente)).thenReturn(usuarioSalvo);
         Mockito.when(modelMapper.map(usuarioSalvo, UsuarioResponseDTO.class)).thenReturn(dto);
 
@@ -159,13 +185,14 @@ class UsuarioServiceTest {
     @Test
     void deveAtualizarUsuarioSemMudarEmail() {
         // --- ARRANGE ---
-        // Quando o email não muda, a verificação de duplicidade não deve ser chamada.
+        // Mantendo o próprio email, a checagem exclui o próprio usuário (id 1) e não encontra conflito.
         UsuarioRequestDTO request = new UsuarioRequestDTO("Carol Atualizada", "carol@gmail.com");
         Usuario usuarioExistente = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
         Usuario usuarioSalvo = new Usuario(1L, "Carol Atualizada", "carol@gmail.com", LocalDateTime.now());
         UsuarioResponseDTO dto = new UsuarioResponseDTO(1L, "Carol Atualizada", "carol@gmail.com", LocalDateTime.now());
 
         Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioExistente));
+        Mockito.when(usuarioRepository.existsByEmailAndIdNot("carol@gmail.com", 1L)).thenReturn(false);
         Mockito.when(usuarioRepository.save(usuarioExistente)).thenReturn(usuarioSalvo);
         Mockito.when(modelMapper.map(usuarioSalvo, UsuarioResponseDTO.class)).thenReturn(dto);
 
@@ -176,8 +203,7 @@ class UsuarioServiceTest {
         assertNotNull(resultado);
         assertEquals("Carol Atualizada", resultado.getNome());
 
-        // Email igual ao atual — existsByEmail não deve ser chamado.
-        Mockito.verify(usuarioRepository, Mockito.never()).existsByEmail(Mockito.any());
+        Mockito.verify(usuarioRepository, Mockito.times(1)).existsByEmailAndIdNot("carol@gmail.com", 1L);
         Mockito.verify(usuarioRepository, Mockito.times(1)).save(usuarioExistente);
     }
 
@@ -189,7 +215,7 @@ class UsuarioServiceTest {
         Usuario usuarioExistente = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
 
         Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioExistente));
-        Mockito.when(usuarioRepository.existsByEmail("outro@gmail.com")).thenReturn(true);
+        Mockito.when(usuarioRepository.existsByEmailAndIdNot("outro@gmail.com", 1L)).thenReturn(true);
 
         // --- ACT + ASSERT ---
         assertThrows(EmailAlreadyExistsException.class, () -> usuarioService.update(1L, request));
@@ -215,25 +241,36 @@ class UsuarioServiceTest {
     @Test
     void deveDeletarUsuario() {
         // --- ARRANGE ---
-        Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
-
-        Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        Mockito.when(usuarioRepository.existsById(1L)).thenReturn(true);
+        Mockito.when(tarefaRepository.existsByUsuarioId(1L)).thenReturn(false);
 
         // --- ACT ---
         usuarioService.delete(1L);
 
         // --- ASSERT ---
-        Mockito.verify(usuarioRepository, Mockito.times(1)).findById(1L);
+        Mockito.verify(usuarioRepository, Mockito.times(1)).existsById(1L);
         Mockito.verify(usuarioRepository, Mockito.times(1)).deleteById(1L);
     }
 
     @Test
     void deveLancarExcecaoAoDeletarUsuarioNaoEncontrado() {
         // --- ARRANGE ---
-        Mockito.when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
+        Mockito.when(usuarioRepository.existsById(99L)).thenReturn(false);
 
         // --- ACT + ASSERT ---
         assertThrows(ObjectNotFoundException.class, () -> usuarioService.delete(99L));
+
+        Mockito.verify(usuarioRepository, Mockito.never()).deleteById(Mockito.any());
+    }
+
+    @Test
+    void deveLancarExcecaoAoDeletarUsuarioComTarefas() {
+        // --- ARRANGE ---
+        Mockito.when(usuarioRepository.existsById(1L)).thenReturn(true);
+        Mockito.when(tarefaRepository.existsByUsuarioId(1L)).thenReturn(true);
+
+        // --- ACT + ASSERT ---
+        assertThrows(UsuarioPossuiTarefasException.class, () -> usuarioService.delete(1L));
 
         Mockito.verify(usuarioRepository, Mockito.never()).deleteById(Mockito.any());
     }
