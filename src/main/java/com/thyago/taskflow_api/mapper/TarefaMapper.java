@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 public class TarefaMapper {
 
     public void preencher(Tarefa tarefa, TarefaRequestDTO dto, Usuario usuario) {
-        tarefa.setTitulo(dto.getTitulo());
-        tarefa.setDescricao(dto.getDescricao());
-        tarefa.setPrioridade(dto.getPrioridade());
-        tarefa.setDataValidade(dto.getDataValidade());
+        tarefa.setTitulo(dto.titulo());
+        tarefa.setDescricao(dto.descricao());
+        tarefa.setPrioridade(dto.prioridade());
+        tarefa.setDataValidade(dto.dataValidade());
         tarefa.setUsuario(usuario);
     }
 

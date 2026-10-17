@@ -12,9 +12,9 @@ import com.thyago.taskflow_api.repository.TarefaRepository;
 import com.thyago.taskflow_api.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
-import java.time.Clock;
 
 @Service
 public class TarefaService {
@@ -51,10 +51,10 @@ public class TarefaService {
     }
 
     public TarefaResponseDTO save(TarefaRequestDTO dto) {
-        Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
+        Usuario usuario = usuarioRepository.findById(dto.idUsuario())
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
-        validarDataValidade(dto.getDataValidade());
+        validarDataValidade(dto.dataValidade());
 
         // O status inicial é sempre PENDENTE (definido na entidade)
         Tarefa tarefa = new Tarefa();
@@ -68,16 +68,16 @@ public class TarefaService {
         Tarefa tarefa = tarefaRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_TAREFA_NAO_ENCONTRADA));
 
-        Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
+        Usuario usuario = usuarioRepository.findById(dto.idUsuario())
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
         // Só valida a data se ela mudou: assim dá para editar uma tarefa que já está atrasada
-        if (!dto.getDataValidade().equals(tarefa.getDataValidade())) {
-            validarDataValidade(dto.getDataValidade());
+        if (!dto.dataValidade().equals(tarefa.getDataValidade())) {
+            validarDataValidade(dto.dataValidade());
         }
 
         // Primeiro valida a transição, para falhar antes de alterar os outros campos
-        tarefa.alterarStatus(dto.getStatus());
+        tarefa.alterarStatus(dto.status());
         tarefaMapper.preencher(tarefa, dto, usuario);
 
         Tarefa salvo = tarefaRepository.save(tarefa);

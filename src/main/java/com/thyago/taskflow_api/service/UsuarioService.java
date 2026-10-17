@@ -41,12 +41,12 @@ public class UsuarioService {
     }
 
     public UsuarioResponseDTO save(UsuarioRequestDTO dto) {
-        String email = normalizar(dto.getEmail());
+        String email = normalizar(dto.email());
         if (usuarioRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException();
         }
         Usuario usuario = new Usuario();
-        usuario.setNome(dto.getNome());
+        usuario.setNome(dto.nome());
         usuario.setEmail(email);
         Usuario salvo = usuarioRepository.save(usuario);
         return usuarioMapper.toResponse(salvo);
@@ -56,12 +56,12 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
-        String email = normalizar(dto.getEmail());
+        String email = normalizar(dto.email());
         if (usuarioRepository.existsByEmailAndIdNot(email, id)) {
             throw new EmailAlreadyExistsException();
         }
 
-        usuario.setNome(dto.getNome());
+        usuario.setNome(dto.nome());
         usuario.setEmail(email);
         Usuario salvo = usuarioRepository.save(usuario);
         return usuarioMapper.toResponse(salvo);

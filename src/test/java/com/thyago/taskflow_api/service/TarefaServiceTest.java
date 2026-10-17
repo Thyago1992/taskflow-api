@@ -66,7 +66,7 @@ class TarefaServiceTest {
         // --- ASSERT ---
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
-        assertEquals("Tarefa 1", resultado.get(0).getTitulo());
+        assertEquals("Tarefa 1", resultado.get(0).titulo());
 
         Mockito.verify(tarefaRepository, Mockito.times(1)).findAll();
     }
@@ -88,8 +88,8 @@ class TarefaServiceTest {
 
         // --- ASSERT ---
         assertNotNull(resultado);
-        assertEquals(1L, resultado.getId());
-        assertEquals("Tarefa 1", resultado.getTitulo());
+        assertEquals(1L, resultado.id());
+        assertEquals("Tarefa 1", resultado.titulo());
 
         Mockito.verify(tarefaRepository, Mockito.times(1)).findById(1L);
     }
@@ -124,8 +124,8 @@ class TarefaServiceTest {
 
         // --- ASSERT ---
         assertNotNull(resultado);
-        assertEquals("Tarefa 1", resultado.getTitulo());
-        assertEquals(1L, resultado.getIdUsuario());
+        assertEquals("Tarefa 1", resultado.titulo());
+        assertEquals(1L, resultado.idUsuario());
 
         Mockito.verify(usuarioRepository, Mockito.times(1)).findById(1L);
         Mockito.verify(tarefaMapper, Mockito.times(1))
@@ -184,8 +184,8 @@ class TarefaServiceTest {
 
         // --- ASSERT ---
         assertNotNull(resultado);
-        assertEquals("Tarefa Atualizada", resultado.getTitulo());
-        assertEquals(StatusTarefa.EM_ANDAMENTO, resultado.getStatus());
+        assertEquals("Tarefa Atualizada", resultado.titulo());
+        assertEquals(StatusTarefa.EM_ANDAMENTO, resultado.status());
         // O status da entidade foi alterado pela regra de transição
         assertEquals(StatusTarefa.EM_ANDAMENTO, tarefaExistente.getStatus());
 
@@ -214,7 +214,7 @@ class TarefaServiceTest {
         TarefaResponseDTO resultado = tarefaService.update(1L, request);
 
         // --- ASSERT ---
-        assertEquals("Novo título", resultado.getTitulo());
+        assertEquals("Novo título", resultado.titulo());
         Mockito.verify(tarefaRepository, Mockito.times(1)).save(tarefaExistente);
     }
 
@@ -296,7 +296,7 @@ class TarefaServiceTest {
         // --- ASSERT ---
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
-        assertEquals(1L, resultado.get(0).getIdUsuario());
+        assertEquals(1L, resultado.get(0).idUsuario());
 
         Mockito.verify(usuarioRepository, Mockito.times(1)).findById(1L);
         Mockito.verify(tarefaRepository, Mockito.times(1)).findByUsuarioId(1L);
@@ -333,7 +333,7 @@ class TarefaServiceTest {
 
         // --- ASSERT ---
         assertNotNull(resultado);
-        assertEquals(StatusTarefa.CONCLUIDA, resultado.getStatus());
+        assertEquals(StatusTarefa.CONCLUIDA, resultado.status());
 
         Mockito.verify(tarefaRepository, Mockito.times(1)).findById(1L);
         Mockito.verify(tarefaRepository, Mockito.times(1)).save(tarefa);

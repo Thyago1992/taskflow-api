@@ -55,7 +55,7 @@ class UsuarioServiceTest {
         // --- ASSERT ---
         assertNotNull(usuarios);
         assertEquals(1, usuarios.size());
-        assertEquals("Carol", usuarios.get(0).getNome());
+        assertEquals("Carol", usuarios.get(0).nome());
 
         Mockito.verify(usuarioRepository, Mockito.times(1)).findAll();
     }
@@ -76,9 +76,9 @@ class UsuarioServiceTest {
 
         // --- ASSERT ---
         assertNotNull(resultado);
-        assertEquals(1L, resultado.getId());
-        assertEquals("Carol", resultado.getNome());
-        assertEquals("carol@gmail.com", resultado.getEmail());
+        assertEquals(1L, resultado.id());
+        assertEquals("Carol", resultado.nome());
+        assertEquals("carol@gmail.com", resultado.email());
 
         Mockito.verify(usuarioRepository, Mockito.times(1)).findById(1L);
     }
@@ -112,8 +112,8 @@ class UsuarioServiceTest {
 
         // --- ASSERT ---
         assertNotNull(resultado);
-        assertEquals("Carol", resultado.getNome());
-        assertEquals("carol@gmail.com", resultado.getEmail());
+        assertEquals("Carol", resultado.nome());
+        assertEquals("carol@gmail.com", resultado.email());
 
         Mockito.verify(usuarioRepository, Mockito.times(1)).existsByEmail("carol@gmail.com");
         Mockito.verify(usuarioRepository, Mockito.times(1)).save(Mockito.any(Usuario.class));
@@ -174,8 +174,8 @@ class UsuarioServiceTest {
 
         // --- ASSERT ---
         assertNotNull(resultado);
-        assertEquals("Carol Atualizada", resultado.getNome());
-        assertEquals("carol.nova@gmail.com", resultado.getEmail());
+        assertEquals("Carol Atualizada", resultado.nome());
+        assertEquals("carol.nova@gmail.com", resultado.email());
 
         Mockito.verify(usuarioRepository, Mockito.times(1)).findById(1L);
         Mockito.verify(usuarioRepository, Mockito.times(1)).save(usuarioExistente);
@@ -200,7 +200,7 @@ class UsuarioServiceTest {
 
         // --- ASSERT ---
         assertNotNull(resultado);
-        assertEquals("Carol Atualizada", resultado.getNome());
+        assertEquals("Carol Atualizada", resultado.nome());
 
         Mockito.verify(usuarioRepository, Mockito.times(1)).existsByEmailAndIdNot("carol@gmail.com", 1L);
         Mockito.verify(usuarioRepository, Mockito.times(1)).save(usuarioExistente);
