@@ -43,6 +43,15 @@ public class TarefaController {
         return ResponseEntity.ok(tarefa);
     }
 
+    @Operation(description = "Recupera as tarefas com data de validade vencida que ainda não foram concluídas " +
+            "nem canceladas, da mais atrasada para a menos atrasada.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Lista de tarefas atrasadas retornada com " +
+            "sucesso.")})
+    @GetMapping("/atrasadas")
+    public ResponseEntity<List<TarefaResponseDTO>> findAtrasadas() {
+        return ResponseEntity.ok(tarefaService.findAtrasadas());
+    }
+
     @Operation(description = "Cria uma nova tarefa no sistema com os dados fornecidos no corpo da requisição.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Tarefa criada com sucesso."),

@@ -314,6 +314,45 @@ class TarefaServiceTest {
         Mockito.verify(tarefaRepository, Mockito.never()).findByUsuarioId(Mockito.any());
     }
 
+    // ======================== findAtrasadas ========================
+
+    @Test
+    void deveRetornarTarefasAtrasadas() {
+        // --- ARRANGE ---
+        Usuario usuario = new Usuario(1L, "Carol", "carol@gmail.com", LocalDateTime.now());
+        LocalDate dataVencida = LocalDate.now().minusDays(2);
+        Tarefa tarefa = new Tarefa(1L, "Atrasada", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now().minusDays(10), dataVencida, usuario);
+        TarefaResponseDTO dto = new TarefaResponseDTO(1L, "Atrasada", "Descrição", StatusTarefa.PENDENTE, PrioridadeTarefa.ALTA, LocalDate.now().minusDays(10), dataVencida, 1L);
+
+        Mockito.when(tarefaRepository.findByDataValidadeBeforeAndStatusNotInOrderByDataValidadeAsc(
+                        Mockito.any(LocalDate.class),
+                        Mockito.eq(List.of(StatusTarefa.CONCLUIDA, StatusTarefa.CANCELADA))))
+                .thenReturn(List.of(tarefa));
+        Mockito.when(tarefaMapper.toResponse(tarefa)).thenReturn(dto);
+
+        // --- ACT ---
+        List<TarefaResponseDTO> resultado = tarefaService.findAtrasadas();
+
+        // --- ASSERT ---
+        assertEquals(1, resultado.size());
+        assertEquals("Atrasada", resultado.get(0).titulo());
+    }
+
+    @Test
+    void deveRetornarListaVaziaQuandoNaoHaTarefasAtrasadas() {
+        // --- ARRANGE ---
+        Mockito.when(tarefaRepository.findByDataValidadeBeforeAndStatusNotInOrderByDataValidadeAsc(
+                        Mockito.any(LocalDate.class),
+                        Mockito.eq(List.of(StatusTarefa.CONCLUIDA, StatusTarefa.CANCELADA))))
+                .thenReturn(List.of());
+
+        // --- ACT ---
+        List<TarefaResponseDTO> resultado = tarefaService.findAtrasadas();
+
+        // --- ASSERT ---
+        assertTrue(resultado.isEmpty());
+    }
+
     // ======================== atualizarStatus ========================
 
     @Test

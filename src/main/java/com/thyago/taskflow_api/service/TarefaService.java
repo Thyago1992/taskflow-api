@@ -25,6 +25,9 @@ public class TarefaService {
 
     private final TarefaMapper tarefaMapper;
 
+    private static final List<StatusTarefa> STATUS_FINAIS =
+            List.of(StatusTarefa.CONCLUIDA, StatusTarefa.CANCELADA);
+
     private final Clock clock;
 
     public TarefaService(TarefaRepository tarefaRepository,
@@ -95,6 +98,15 @@ public class TarefaService {
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
         return tarefaRepository.findByUsuarioId(idUsuario)
+                .stream()
+                .map(tarefaMapper::toResponse)
+                .toList();
+    }
+
+    public List<TarefaResponseDTO> findAtrasadas() {
+        LocalDate hoje = LocalDate.now(clock);
+        return tarefaRepository
+                .findByDataValidadeBeforeAndStatusNotInOrderByDataValidadeAsc(hoje, STATUS_FINAIS)
                 .stream()
                 .map(tarefaMapper::toResponse)
                 .toList();
