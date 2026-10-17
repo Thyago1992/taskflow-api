@@ -44,10 +44,10 @@ public class TarefaService {
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
+        // O status inicial é sempre PENDENTE (definido na entidade)
         Tarefa tarefa = new Tarefa();
         tarefa.setTitulo(dto.getTitulo());
         tarefa.setDescricao(dto.getDescricao());
-        tarefa.setStatus(dto.getStatus());
         tarefa.setPrioridade(dto.getPrioridade());
         tarefa.setDataValidade(dto.getDataValidade());
         tarefa.setUsuario(usuario);
@@ -60,16 +60,16 @@ public class TarefaService {
         Tarefa tarefa = tarefaRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_TAREFA_NAO_ENCONTRADA));
 
-        // Busca o novo usuário e atualiza o vínculo
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
 
+        // Primeiro valida a transição, para falhar antes de alterar os outros campos
+        tarefa.alterarStatus(dto.getStatus());
         tarefa.setTitulo(dto.getTitulo());
         tarefa.setDescricao(dto.getDescricao());
-        tarefa.setStatus(dto.getStatus());
         tarefa.setPrioridade(dto.getPrioridade());
         tarefa.setDataValidade(dto.getDataValidade());
-        tarefa.setUsuario(usuario); // ← faltava isso
+        tarefa.setUsuario(usuario);
 
         Tarefa salvo = tarefaRepository.save(tarefa);
         return modelMapper.map(salvo, TarefaResponseDTO.class);
@@ -94,7 +94,7 @@ public class TarefaService {
     public TarefaResponseDTO atualizarStatus(Long id, StatusTarefa status) {
         Tarefa tarefa = tarefaRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_TAREFA_NAO_ENCONTRADA));
-        tarefa.setStatus(status);
+        tarefa.alterarStatus(status);
         Tarefa salvo = tarefaRepository.save(tarefa);
         return modelMapper.map(salvo, TarefaResponseDTO.class);
     }

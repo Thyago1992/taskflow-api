@@ -2,7 +2,9 @@ package com.thyago.taskflow_api.entity;
 
 import com.thyago.taskflow_api.enums.PrioridadeTarefa;
 import com.thyago.taskflow_api.enums.StatusTarefa;
+import com.thyago.taskflow_api.exception.TransicaoStatusInvalidaException;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,9 +30,10 @@ public class Tarefa {
     @Column(nullable = false)
     private String descricao;
 
+    @Setter(AccessLevel.NONE)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatusTarefa status;
+    private StatusTarefa status = StatusTarefa.PENDENTE;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -49,6 +52,16 @@ public class Tarefa {
     @PrePersist
     public void prePersist() {
         dataCriacao = LocalDate.now();
+    }
+
+    public void alterarStatus(StatusTarefa novoStatus) {
+        if (status == novoStatus) {
+            return;
+        }
+        if (!status.podeIrPara(novoStatus)) {
+            throw new TransicaoStatusInvalidaException(status, novoStatus);
+        }
+        status = novoStatus;
     }
 
     @Override
