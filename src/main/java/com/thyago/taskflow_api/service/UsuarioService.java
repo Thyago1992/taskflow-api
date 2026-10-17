@@ -36,7 +36,7 @@ public class UsuarioService {
 
     public UsuarioResponseDTO save(UsuarioRequestDTO dto) {
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
-            throw new EmailAlreadyExistsException("Email já cadastrado");
+            throw new EmailAlreadyExistsException();
         }
         Usuario usuario = modelMapper.map(dto, Usuario.class);
         Usuario salvo = usuarioRepository.save(usuario);
@@ -50,7 +50,7 @@ public class UsuarioService {
         // Verifica se o email pertence a OUTRO usuário
         if (!usuario.getEmail().equals(dto.getEmail())
                 && usuarioRepository.existsByEmail(dto.getEmail())) {
-            throw new EmailAlreadyExistsException(EmailAlreadyExistsException.MSG_EMAIL_EXISTENTE);
+            throw new EmailAlreadyExistsException();
         }
 
         usuario.setNome(dto.getNome());
@@ -64,6 +64,5 @@ public class UsuarioService {
                 .orElseThrow(() -> new ObjectNotFoundException(ObjectNotFoundException.MSG_USUARIO_NAO_ENCONTRADO));
         usuarioRepository.deleteById(id);
     }
-
 
 }
