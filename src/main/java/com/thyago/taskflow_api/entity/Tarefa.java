@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import com.thyago.taskflow_api.config.FusoPadrao;
 
 @Getter
 @Setter
@@ -51,7 +52,7 @@ public class Tarefa {
 
     @PrePersist
     public void prePersist() {
-        dataCriacao = LocalDate.now();
+        dataCriacao = LocalDate.now(FusoPadrao.ZONA);
     }
 
     public void alterarStatus(StatusTarefa novoStatus) {

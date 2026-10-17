@@ -1,5 +1,6 @@
 package com.thyago.taskflow_api.service;
 
+import com.thyago.taskflow_api.config.FusoPadrao;
 import com.thyago.taskflow_api.dto.TarefaRequestDTO;
 import com.thyago.taskflow_api.dto.TarefaResponseDTO;
 import com.thyago.taskflow_api.entity.Tarefa;
@@ -22,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +44,7 @@ class TarefaServiceTest {
 
     @BeforeEach
     void setUp() {
-        Clock clock = Clock.system(ZoneId.of("America/Sao_Paulo"));
+        Clock clock = Clock.system(FusoPadrao.ZONA);
         tarefaService = new TarefaService(tarefaRepository, usuarioRepository, tarefaMapper, clock);
     }
 

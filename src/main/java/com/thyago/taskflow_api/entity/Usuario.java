@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import com.thyago.taskflow_api.config.FusoPadrao;
 
 @Getter
 @Setter
@@ -31,7 +32,7 @@ public class Usuario {
 
     @PrePersist
     public void prePersist() {
-        dataCriacao = LocalDateTime.now();
+        dataCriacao = LocalDateTime.now(FusoPadrao.ZONA);
     }
 
     @Override
