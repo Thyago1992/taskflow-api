@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:17
+    container_name: taskflow-db
+    environment:
+      POSTGRES_DB: taskflow_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina a variavel DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - taskflow-pgdata:/var/lib/postgresql/data
+
+volumes:
+  taskflow-pgdata:
