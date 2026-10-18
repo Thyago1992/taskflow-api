@@ -1,149 +1,141 @@
-# 📋 TaskFlow API
+# TaskFlow API
 
 API REST para gerenciamento de tarefas pessoais, desenvolvida com Spring Boot 4.0.3 e Java 17.
 
-## 🎯 Sobre o Projeto
+## Sobre o Projeto
 
-Sistema completo para gerenciamento de tarefas que permite:
+Sistema para gerenciamento de tarefas que permite:
 
-- ✅ Cadastro e gerenciamento de usuários
-- ✅ Criação de tarefas com prioridade e prazo
-- ✅ Atualização parcial de status via PATCH
-- ✅ Listagem de tarefas por usuário
-- ✅ Validação de dados e regras de negócio
-- ✅ Tratamento centralizado de erros com respostas padronizadas
+- Cadastro e gerenciamento de usuários
+- Criação de tarefas com prioridade e prazo
+- Controle de status com regras de transição
+- Listagem paginada e filtrada por status
+- Consulta de tarefas atrasadas
+- Validação de dados e regras de negócio
+- Tratamento centralizado de erros com respostas padronizadas
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 ### Usuários
 
-- ✅ Cadastro com nome e email
-- ✅ Validação de email único no sistema
-- ✅ Validação de formato de email
-- ✅ Atualização de dados com verificação de conflito de email
+- Cadastro com nome e email
+- Email normalizado (minúsculas, sem espaços) e único no sistema
+- Atualização com verificação de conflito de email
+- Exclusão bloqueada enquanto o usuário tiver tarefas
 
 ### Tarefas
 
-- ✅ Criação de tarefas vinculadas a um usuário
-- ✅ Definição de prioridade: `BAIXA`, `MEDIA`, `ALTA`
-- ✅ Definição de status: `PENDENTE`, `EM_ANDAMENTO`, `CONCLUIDA`, `CANCELADA`
-- ✅ Atualização completa via PUT
-- ✅ Atualização parcial de status via PATCH
-- ✅ Listagem de todas as tarefas de um usuário
-- ✅ Validação de usuário existente ao criar ou atualizar tarefa
+- Criação de tarefas vinculadas a um usuário (sempre nascem `PENDENTE`)
+- Prioridade: `BAIXA`, `MEDIA`, `ALTA`
+- Status: `PENDENTE`, `EM_ANDAMENTO`, `CONCLUIDA`, `CANCELADA`
+- Atualização completa via PUT e atualização de status via PATCH
+- Listagem paginada com filtro opcional por status
+- Listagem de tarefas por usuário
+- Listagem de tarefas atrasadas (vencidas e ainda abertas)
 
-## 🛠 Tecnologias Utilizadas
+## Tecnologias
 
-### Backend
+- Java 17
+- Spring Boot 4.0.3 (Web, Data JPA, Validation)
+- Hibernate
+- PostgreSQL (execução) e H2 em memória (testes)
+- Lombok
+- SpringDoc OpenAPI 3.0.2 (Swagger UI)
+- JUnit 5 e Mockito
+- Maven
 
-- ✅ Java 17
-- ✅ Spring Boot 4.0.3
-- ✅ Spring Web
-- ✅ Spring Data JPA
-- ✅ Spring Validation
-- ✅ Spring DevTools
-- ✅ Hibernate (JPA Provider)
-- ✅ Lombok — redução de boilerplate
-- ✅ ModelMapper 3.2.0 — mapeamento de objetos
+## Arquitetura
 
-### Banco de Dados
-
-- ✅ PostgreSQL (produção)
-- ✅ H2 Database (em memória, disponível para testes)
-
-### Documentação
-
-- ✅ SpringDoc OpenAPI 3.0.2 (Swagger UI)
-
-### Testes
-
-- ✅ JUnit 5
-- ✅ Mockito
-- ✅ Spring Boot Test
-
-### Build
-
-- ✅ Maven
-
-## 🏗 Arquitetura
-
-O projeto segue uma arquitetura em camadas (Controller-Service-Repository):
+Arquitetura em camadas (Controller, Service, Repository), com mapeamento explícito entre entidades e DTOs:
 
 ```
 com.thyago.taskflow_api
-├── config/          # Configurações (ModelMapper)
+├── config/          # Fuso horário padrão e Clock
 ├── controller/      # Endpoints REST
-├── dto/             # Data Transfer Objects (Request e Response)
+├── dto/             # Requests e responses (records)
 ├── entity/          # Entidades JPA
-├── enums/           # Enumerações (StatusTarefa, PrioridadeTarefa)
-├── exception/       # Exceções customizadas e handler global
+├── enums/           # StatusTarefa (com regra de transição) e PrioridadeTarefa
+├── exception/       # Exceções de negócio e handler global
+├── mapper/          # Conversão entre entidades e DTOs
 ├── repository/      # Repositórios Spring Data JPA
-└── service/         # Lógica de negócio
+└── service/         # Regras de negócio
 ```
 
-## 🚀 Instalação
+Decisões de design:
+
+- **Regra de status no domínio:** a transição é validada pelo enum `StatusTarefa` e aplicada pela entidade `Tarefa`, que não expõe setter de status.
+- **Exceções com status HTTP:** toda exceção de negócio estende `NegocioException`, então o handler global não precisa de um método novo a cada exceção.
+- **Fuso explícito:** datas são calculadas em `America/Sao_Paulo`, via `Clock` injetado nos services.
+- **Mappers explícitos:** sem reflexão nem configuração mágica na conversão de objetos.
+
+## Instalação
 
 ### Pré-requisitos
 
 - Java 17+
-- Maven
 - PostgreSQL
 
 ### 1. Clone o repositório
 
-```bash
+```
 git clone https://github.com/Thyago1992/taskflow-api.git
 cd taskflow-api
 ```
 
-### 2. Configure o banco de dados
-
-Crie o banco no PostgreSQL:
+### 2. Crie o banco
 
 ```sql
 CREATE DATABASE taskflow_db;
 ```
 
-### 3. Configure as variáveis de ambiente
+### 3. Defina as variáveis de ambiente
 
-Defina a variável de ambiente com a senha do banco:
+| Variável | Obrigatória | Padrão |
+| --- | --- | --- |
+| `DB_PASSWORD` | Sim | (nenhum) |
+| `DB_URL` | Não | `jdbc:postgresql://localhost:5432/taskflow_db` |
+| `DB_USER` | Não | `postgres` |
 
-```bash
+Linux/macOS:
+
+```
 export DB_PASSWORD=sua_senha
 ```
 
-### 4. Compile e execute
+Windows (PowerShell):
 
-```bash
-mvn clean install
-mvn spring-boot:run
+```
+$env:DB_PASSWORD="sua_senha"
 ```
 
-A aplicação estará disponível em: `http://localhost:8080`
+### 4. Execute
 
-## ⚙ Configuração
-
-### application.properties
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/taskflow_db
-spring.datasource.username=postgres
-spring.datasource.password=${DB_PASSWORD}
-
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+```
+./mvnw spring-boot:run
 ```
 
-## 🔌 Endpoints da API
+No Windows, use `.\mvnw.cmd spring-boot:run`. A aplicação sobe em `http://localhost:8080`.
+
+Para ver o SQL no console, ative o perfil de desenvolvimento:
+
+```
+export SPRING_PROFILES_ACTIVE=dev
+```
+
+## Endpoints
 
 ### Usuários
 
-#### POST /usuarios
-Cadastra um novo usuário.
+| Método | Rota | Descrição | Sucesso |
+| --- | --- | --- | --- |
+| POST | `/usuarios` | Cadastra um usuário | 201 |
+| GET | `/usuarios` | Lista todos os usuários | 200 |
+| GET | `/usuarios/{id}` | Busca um usuário | 200 |
+| PUT | `/usuarios/{id}` | Atualiza um usuário | 200 |
+| DELETE | `/usuarios/{id}` | Remove um usuário (sem tarefas) | 204 |
 
-**Request Body:**
+Exemplo de cadastro:
+
 ```json
 {
   "nome": "João Silva",
@@ -151,236 +143,122 @@ Cadastra um novo usuário.
 }
 ```
 
-**Response: 201 Created**
-```json
-{
-  "id": 1,
-  "nome": "João Silva",
-  "email": "joao.silva@email.com",
-  "dataCriacao": "2025-03-21T10:00:00"
-}
-```
-
-#### GET /usuarios
-Lista todos os usuários. **Response: 200 OK**
-
-#### GET /usuarios/{id}
-Retorna um usuário pelo ID. **Response: 200 OK**
-
-#### PUT /usuarios/{id}
-Atualiza os dados de um usuário. **Response: 200 OK**
-
-#### DELETE /usuarios/{id}
-Remove um usuário. **Response: 204 No Content**
-
----
-
 ### Tarefas
 
-#### POST /tarefas
-Cria uma nova tarefa.
+| Método | Rota | Descrição | Sucesso |
+| --- | --- | --- | --- |
+| POST | `/tarefas` | Cria uma tarefa (sempre `PENDENTE`) | 201 |
+| GET | `/tarefas` | Lista paginada, com filtro por status | 200 |
+| GET | `/tarefas/atrasadas` | Tarefas vencidas e ainda abertas | 200 |
+| GET | `/tarefas/{id}` | Busca uma tarefa | 200 |
+| GET | `/tarefas/usuario/{idUsuario}` | Tarefas de um usuário | 200 |
+| PUT | `/tarefas/{id}` | Atualiza todos os dados | 200 |
+| PATCH | `/tarefas/{id}/status?status=CONCLUIDA` | Atualiza só o status | 200 |
+| DELETE | `/tarefas/{id}` | Remove uma tarefa | 204 |
 
-**Request Body:**
+Exemplo de criação (o campo `status` enviado na criação é ignorado):
+
 ```json
 {
   "titulo": "Estudar Spring Boot",
   "descricao": "Revisar conceitos de JPA e REST",
   "status": "PENDENTE",
   "prioridade": "ALTA",
-  "dataValidade": "2025-04-30",
+  "dataValidade": "2026-12-31",
   "idUsuario": 1
 }
 ```
 
-**Response: 201 Created**
+### Paginação e filtro
+
+`GET /tarefas` aceita os parâmetros:
+
+| Parâmetro | Descrição | Padrão |
+| --- | --- | --- |
+| `status` | Filtra por status | todos |
+| `page` | Número da página (começa em 0) | 0 |
+| `size` | Itens por página (máximo 50) | 10 |
+| `sort` | Campo e direção, ex.: `titulo,asc` | `dataValidade` |
+
+Formato da resposta:
+
 ```json
 {
-  "id": 1,
-  "titulo": "Estudar Spring Boot",
-  "descricao": "Revisar conceitos de JPA e REST",
-  "status": "PENDENTE",
-  "prioridade": "ALTA",
-  "dataCriacao": "2025-03-21",
-  "dataValidade": "2025-04-30",
-  "idUsuario": 1
+  "conteudo": [],
+  "pagina": 0,
+  "tamanho": 10,
+  "totalElementos": 25,
+  "totalPaginas": 3
 }
 ```
 
-#### GET /tarefas
-Lista todas as tarefas. **Response: 200 OK**
+## Regras de Negócio
 
-#### GET /tarefas/{id}
-Retorna uma tarefa pelo ID. **Response: 200 OK**
+### Status das tarefas
 
-#### GET /tarefas/usuario/{idUsuario}
-Lista todas as tarefas de um usuário específico. **Response: 200 OK**
+Toda tarefa nasce `PENDENTE`. Transições permitidas:
 
-#### PUT /tarefas/{id}
-Atualiza todos os dados de uma tarefa. **Response: 200 OK**
+| De | Para |
+| --- | --- |
+| `PENDENTE` | `EM_ANDAMENTO`, `CONCLUIDA`, `CANCELADA` |
+| `EM_ANDAMENTO` | `PENDENTE`, `CONCLUIDA`, `CANCELADA` |
+| `CONCLUIDA` | nenhuma |
+| `CANCELADA` | nenhuma |
 
-#### PATCH /tarefas/{id}/status
-Atualiza apenas o status de uma tarefa.
+Transição inválida retorna **422**. A regra vale para o PATCH e para o PUT.
 
-**Query param:** `?status=CONCLUIDA`
+### Validações
 
-**Response: 200 OK**
+- Título: obrigatório, até 120 caracteres
+- Descrição: obrigatória, até 255 caracteres
+- Nome do usuário: obrigatório, até 100 caracteres
+- Email: obrigatório, formato válido, até 255 caracteres, único
+- Data de validade: obrigatória e não pode estar no passado (no PUT, só é validada se for alterada, o que permite editar tarefas já atrasadas)
+- O usuário vinculado à tarefa deve existir
 
-#### DELETE /tarefas/{id}
-Remove uma tarefa. **Response: 204 No Content**
+## Tratamento de Erros
 
-## 🗄 Estrutura do Banco de Dados
-
-### Tabela: usuarios
-
-| Campo       | Tipo          | Restrições             |
-|-------------|---------------|------------------------|
-| id          | BIGINT        | PK, AUTO_INCREMENT     |
-| nome        | VARCHAR       | NOT NULL               |
-| email       | VARCHAR       | NOT NULL, UNIQUE       |
-| data_criacao| TIMESTAMP     | NOT NULL               |
-
-### Tabela: tarefas
-
-| Campo          | Tipo    | Restrições                  |
-|----------------|---------|-----------------------------|
-| id             | BIGINT  | PK, AUTO_INCREMENT          |
-| titulo         | VARCHAR | NOT NULL                    |
-| descricao      | VARCHAR | NOT NULL                    |
-| status         | VARCHAR | NOT NULL (enum)             |
-| prioridade     | VARCHAR | NOT NULL (enum)             |
-| data_criacao   | DATE    | NOT NULL                    |
-| data_validade  | DATE    | NOT NULL                    |
-| id_usuario     | BIGINT  | FK (usuarios.id), NOT NULL  |
-
-### Relacionamentos
-
-```
-tarefas.id_usuario → usuarios.id (N:1)
-```
-
-## ✔ Validações e Regras de Negócio
-
-### Usuários
-
-- ✅ Nome é obrigatório
-- ✅ Email é obrigatório e deve ter formato válido
-- ✅ Email deve ser único no sistema
-- ✅ Na atualização, verifica se o novo email pertence a outro usuário
-
-### Tarefas
-
-- ✅ Título é obrigatório
-- ✅ Descrição é obrigatória
-- ✅ Status é obrigatório (`PENDENTE`, `EM_ANDAMENTO`, `CONCLUIDA`, `CANCELADA`)
-- ✅ Prioridade é obrigatória (`BAIXA`, `MEDIA`, `ALTA`)
-- ✅ Data de validade é obrigatória
-- ✅ Usuário vinculado deve existir no sistema
-- ✅ Data de criação preenchida automaticamente via `@PrePersist`
-
-## 🛡 Tratamento de Exceções
-
-A API possui tratamento centralizado via `@RestControllerAdvice` com respostas padronizadas.
-
-### Exceções customizadas
-
-| Exceção                      | Status | Descrição                        |
-|------------------------------|--------|----------------------------------|
-| `ObjectNotFoundException`    | 404    | Recurso não encontrado           |
-| `EmailAlreadyExistsException`| 409    | Email já cadastrado no sistema   |
-| `MethodArgumentNotValidException` | 400 | Erro de validação de campos  |
-| `Exception`                  | 500    | Erro interno do servidor         |
-
-### Formato de resposta de erro
+Respostas padronizadas:
 
 ```json
 {
   "status": 404,
   "mensagem": "Tarefa não encontrada",
-  "timestamp": "2025-03-21T10:00:00"
+  "timestamp": "2026-10-17T10:00:00"
 }
 ```
 
-## 📚 Documentação Swagger
+| Situação | Status |
+| --- | --- |
+| Campos inválidos (todas as mensagens, separadas por `;`) | 400 |
+| JSON malformado ou enum inexistente no corpo | 400 |
+| Parâmetro inválido (ex.: `status=XYZ`) ou campo de ordenação inexistente | 400 |
+| Data de validade no passado | 400 |
+| Usuário ou tarefa não encontrados | 404 |
+| Email já cadastrado | 409 |
+| Exclusão de usuário que possui tarefas | 409 |
+| Transição de status inválida | 422 |
+| Erro inesperado | 500 |
 
-A API possui documentação interativa via Swagger UI.
+## Documentação Swagger
 
-**Acesso:** `http://localhost:8080/swagger-ui/index.html`
+Com a aplicação rodando: `http://localhost:8080/swagger-ui/index.html`
 
-A documentação inclui:
+## Testes
 
-- Descrição de todos os endpoints
-- Modelos de request e response
-- Códigos de status HTTP
-- Possibilidade de testar endpoints diretamente
-
-## 💡 Exemplos de Uso
-
-### 1. Cadastrar um usuário
-
-```bash
-curl -X POST http://localhost:8080/usuarios \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nome": "João Silva",
-    "email": "joao.silva@email.com"
-  }'
+```
+./mvnw test
 ```
 
-### 2. Criar uma tarefa
+- Testes unitários dos services (cenários de sucesso e de erro, regras de status e de data)
+- Teste da regra de transição do enum `StatusTarefa`
+- Teste de contexto da aplicação, que usa H2 em memória e não exige PostgreSQL
 
-```bash
-curl -X POST http://localhost:8080/tarefas \
-  -H "Content-Type: application/json" \
-  -d '{
-    "titulo": "Estudar Spring Boot",
-    "descricao": "Revisar conceitos de JPA e REST",
-    "status": "PENDENTE",
-    "prioridade": "ALTA",
-    "dataValidade": "2025-04-30",
-    "idUsuario": 1
-  }'
-```
+## Licença
 
-### 3. Listar tarefas de um usuário
+Projeto desenvolvido para fins educacionais.
 
-```bash
-curl -X GET http://localhost:8080/tarefas/usuario/1
-```
-
-### 4. Atualizar status de uma tarefa
-
-```bash
-curl -X PATCH "http://localhost:8080/tarefas/1/status?status=CONCLUIDA"
-```
-
-### 5. Deletar uma tarefa
-
-```bash
-curl -X DELETE http://localhost:8080/tarefas/1
-```
-
-## 🧪 Testes
-
-O projeto possui testes unitários cobrindo todos os métodos dos services com os cenários de sucesso e de erro.
-
-### Executar os testes
-
-```bash
-mvn test
-```
-
-### Cobertura
-
-| Classe           | Cenários testados                                              |
-|------------------|----------------------------------------------------------------|
-| `TarefaService`  | findAll, findById, save, update, delete, findByUsuario, atualizarStatus |
-| `UsuarioService` | findAll, findById, save, update (com e sem mudança de email), delete |
-
-## 📝 Licença
-
-Este projeto foi desenvolvido para fins educacionais.
-
-## 👤 Autor
+## Autor
 
 Desenvolvido por **Thyago Antonio Sampaio Valadares** como projeto de portfólio.
 
