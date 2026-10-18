@@ -1,52 +1,76 @@
-# TaskFlow API
+# 📋 TaskFlow API
 
 API REST para gerenciamento de tarefas pessoais, desenvolvida com Spring Boot 4.0.3 e Java 17.
 
-## Sobre o Projeto
+## 🎯 Sobre o Projeto
 
-Sistema para gerenciamento de tarefas que permite:
+Sistema completo para gerenciamento de tarefas que permite:
 
-- Cadastro e gerenciamento de usuários
-- Criação de tarefas com prioridade e prazo
-- Controle de status com regras de transição
-- Listagem paginada e filtrada por status
-- Consulta de tarefas atrasadas
-- Validação de dados e regras de negócio
-- Tratamento centralizado de erros com respostas padronizadas
+- ✅ Cadastro e gerenciamento de usuários
+- ✅ Criação de tarefas com prioridade e prazo
+- ✅ Controle de status com regras de transição
+- ✅ Listagem paginada com filtro por status
+- ✅ Consulta de tarefas atrasadas
+- ✅ Validação de dados e regras de negócio
+- ✅ Tratamento centralizado de erros com respostas padronizadas
 
-## Funcionalidades
+## ✨ Funcionalidades
 
 ### Usuários
 
-- Cadastro com nome e email
-- Email normalizado (minúsculas, sem espaços) e único no sistema
-- Atualização com verificação de conflito de email
-- Exclusão bloqueada enquanto o usuário tiver tarefas
+- ✅ Cadastro com nome e email
+- ✅ Email normalizado (minúsculas e sem espaços) e único no sistema
+- ✅ Atualização de dados com verificação de conflito de email
+- ✅ Exclusão bloqueada enquanto o usuário possuir tarefas
 
 ### Tarefas
 
-- Criação de tarefas vinculadas a um usuário (sempre nascem `PENDENTE`)
-- Prioridade: `BAIXA`, `MEDIA`, `ALTA`
-- Status: `PENDENTE`, `EM_ANDAMENTO`, `CONCLUIDA`, `CANCELADA`
-- Atualização completa via PUT e atualização de status via PATCH
-- Listagem paginada com filtro opcional por status
-- Listagem de tarefas por usuário
-- Listagem de tarefas atrasadas (vencidas e ainda abertas)
+- ✅ Criação de tarefas vinculadas a um usuário (sempre nascem `PENDENTE`)
+- ✅ Definição de prioridade: `BAIXA`, `MEDIA`, `ALTA`
+- ✅ Status: `PENDENTE`, `EM_ANDAMENTO`, `CONCLUIDA`, `CANCELADA`
+- ✅ Regras de transição entre status (ex.: tarefa concluída não pode ser reaberta)
+- ✅ Atualização completa via PUT
+- ✅ Atualização parcial de status via PATCH
+- ✅ Listagem paginada, ordenável e filtrável por status
+- ✅ Listagem de todas as tarefas de um usuário
+- ✅ Listagem de tarefas atrasadas (vencidas e ainda abertas)
+- ✅ Validação de usuário existente ao criar ou atualizar tarefa
 
-## Tecnologias
+## 🛠 Tecnologias Utilizadas
 
-- Java 17
-- Spring Boot 4.0.3 (Web, Data JPA, Validation)
-- Hibernate
-- PostgreSQL (execução) e H2 em memória (testes)
-- Lombok
-- SpringDoc OpenAPI 3.0.2 (Swagger UI)
-- JUnit 5 e Mockito
-- Maven
+### Backend
 
-## Arquitetura
+- ✅ Java 17
+- ✅ Spring Boot 4.0.3
+- ✅ Spring Web (MVC)
+- ✅ Spring Data JPA
+- ✅ Spring Validation
+- ✅ Spring DevTools
+- ✅ Hibernate (JPA Provider)
+- ✅ Lombok: redução de boilerplate
 
-Arquitetura em camadas (Controller, Service, Repository), com mapeamento explícito entre entidades e DTOs:
+### Banco de Dados
+
+- ✅ PostgreSQL (execução)
+- ✅ H2 Database em memória (testes)
+
+### Documentação
+
+- ✅ SpringDoc OpenAPI 3.0.2 (Swagger UI)
+
+### Testes
+
+- ✅ JUnit 5
+- ✅ Mockito
+- ✅ Spring Boot Test
+
+### Build
+
+- ✅ Maven
+
+## 🏗 Arquitetura
+
+O projeto segue uma arquitetura em camadas (Controller-Service-Repository), com mapeamento explícito entre entidades e DTOs:
 
 ```
 com.thyago.taskflow_api
@@ -54,88 +78,113 @@ com.thyago.taskflow_api
 ├── controller/      # Endpoints REST
 ├── dto/             # Requests e responses (records)
 ├── entity/          # Entidades JPA
-├── enums/           # StatusTarefa (com regra de transição) e PrioridadeTarefa
+├── enums/           # Enumerações (StatusTarefa, PrioridadeTarefa)
 ├── exception/       # Exceções de negócio e handler global
 ├── mapper/          # Conversão entre entidades e DTOs
 ├── repository/      # Repositórios Spring Data JPA
-└── service/         # Regras de negócio
+└── service/         # Lógica de negócio
 ```
 
-Decisões de design:
+### Decisões de design
 
-- **Regra de status no domínio:** a transição é validada pelo enum `StatusTarefa` e aplicada pela entidade `Tarefa`, que não expõe setter de status.
-- **Exceções com status HTTP:** toda exceção de negócio estende `NegocioException`, então o handler global não precisa de um método novo a cada exceção.
-- **Fuso explícito:** datas são calculadas em `America/Sao_Paulo`, via `Clock` injetado nos services.
-- **Mappers explícitos:** sem reflexão nem configuração mágica na conversão de objetos.
+- ✅ **Regra de status no domínio:** a transição é validada pelo enum `StatusTarefa` e aplicada pela entidade `Tarefa`, que não expõe setter de status
+- ✅ **Exceções com status HTTP:** toda exceção de negócio estende `NegocioException`, então o handler global não precisa de um método novo a cada exceção
+- ✅ **Fuso explícito:** datas calculadas em `America/Sao_Paulo`, com `Clock` injetado nos services
+- ✅ **Mappers explícitos:** conversão entre objetos sem reflexão e sem configuração escondida
 
-## Instalação
+## 🚀 Instalação
 
 ### Pré-requisitos
 
 - Java 17+
+- Maven (ou o Maven Wrapper incluído no projeto)
 - PostgreSQL
 
 ### 1. Clone o repositório
 
-```
+```bash
 git clone https://github.com/Thyago1992/taskflow-api.git
 cd taskflow-api
 ```
 
-### 2. Crie o banco
+### 2. Configure o banco de dados
+
+Crie o banco no PostgreSQL:
 
 ```sql
 CREATE DATABASE taskflow_db;
 ```
 
-### 3. Defina as variáveis de ambiente
+### 3. Configure as variáveis de ambiente
 
-| Variável | Obrigatória | Padrão |
-| --- | --- | --- |
-| `DB_PASSWORD` | Sim | (nenhum) |
-| `DB_URL` | Não | `jdbc:postgresql://localhost:5432/taskflow_db` |
-| `DB_USER` | Não | `postgres` |
+| Variável      | Obrigatória | Padrão                                         |
+|---------------|-------------|------------------------------------------------|
+| `DB_PASSWORD` | Sim         | (nenhum)                                       |
+| `DB_URL`      | Não         | `jdbc:postgresql://localhost:5432/taskflow_db` |
+| `DB_USER`     | Não         | `postgres`                                     |
 
 Linux/macOS:
 
-```
+```bash
 export DB_PASSWORD=sua_senha
 ```
 
 Windows (PowerShell):
 
-```
+```powershell
 $env:DB_PASSWORD="sua_senha"
 ```
 
-### 4. Execute
+### 4. Compile e execute
 
+```bash
+mvn clean install
+mvn spring-boot:run
 ```
-./mvnw spring-boot:run
-```
 
-No Windows, use `.\mvnw.cmd spring-boot:run`. A aplicação sobe em `http://localhost:8080`.
+Com o Maven Wrapper: `./mvnw spring-boot:run` (no Windows, `.\mvnw.cmd spring-boot:run`).
 
-Para ver o SQL no console, ative o perfil de desenvolvimento:
+A aplicação estará disponível em: `http://localhost:8080`
 
-```
+Para exibir o SQL no console, ative o perfil de desenvolvimento:
+
+```bash
 export SPRING_PROFILES_ACTIVE=dev
 ```
 
-## Endpoints
+## ⚙ Configuração
+
+### application.properties
+
+```properties
+spring.application.name=taskflow-api
+
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/taskflow_db}
+spring.datasource.username=${DB_USER:postgres}
+spring.datasource.password=${DB_PASSWORD}
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.open-in-view=false
+spring.jpa.show-sql=false
+
+spring.data.web.pageable.max-page-size=50
+```
+
+### application-dev.properties
+
+```properties
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+```
+
+## 🔌 Endpoints da API
 
 ### Usuários
 
-| Método | Rota | Descrição | Sucesso |
-| --- | --- | --- | --- |
-| POST | `/usuarios` | Cadastra um usuário | 201 |
-| GET | `/usuarios` | Lista todos os usuários | 200 |
-| GET | `/usuarios/{id}` | Busca um usuário | 200 |
-| PUT | `/usuarios/{id}` | Atualiza um usuário | 200 |
-| DELETE | `/usuarios/{id}` | Remove um usuário (sem tarefas) | 204 |
+#### POST /usuarios
+Cadastra um novo usuário.
 
-Exemplo de cadastro:
-
+**Request Body:**
 ```json
 {
   "nome": "João Silva",
@@ -143,21 +192,36 @@ Exemplo de cadastro:
 }
 ```
 
+**Response: 201 Created**
+```json
+{
+  "id": 1,
+  "nome": "João Silva",
+  "email": "joao.silva@email.com",
+  "dataCriacao": "2026-10-17T10:00:00"
+}
+```
+
+#### GET /usuarios
+Lista todos os usuários. **Response: 200 OK**
+
+#### GET /usuarios/{id}
+Retorna um usuário pelo ID. **Response: 200 OK**
+
+#### PUT /usuarios/{id}
+Atualiza os dados de um usuário. **Response: 200 OK**
+
+#### DELETE /usuarios/{id}
+Remove um usuário que não possui tarefas. **Response: 204 No Content**
+
+---
+
 ### Tarefas
 
-| Método | Rota | Descrição | Sucesso |
-| --- | --- | --- | --- |
-| POST | `/tarefas` | Cria uma tarefa (sempre `PENDENTE`) | 201 |
-| GET | `/tarefas` | Lista paginada, com filtro por status | 200 |
-| GET | `/tarefas/atrasadas` | Tarefas vencidas e ainda abertas | 200 |
-| GET | `/tarefas/{id}` | Busca uma tarefa | 200 |
-| GET | `/tarefas/usuario/{idUsuario}` | Tarefas de um usuário | 200 |
-| PUT | `/tarefas/{id}` | Atualiza todos os dados | 200 |
-| PATCH | `/tarefas/{id}/status?status=CONCLUIDA` | Atualiza só o status | 200 |
-| DELETE | `/tarefas/{id}` | Remove uma tarefa | 204 |
+#### POST /tarefas
+Cria uma nova tarefa. A tarefa sempre nasce com status `PENDENTE`, e o campo `status` enviado no corpo é ignorado.
 
-Exemplo de criação (o campo `status` enviado na criação é ignorado):
-
+**Request Body:**
 ```json
 {
   "titulo": "Estudar Spring Boot",
@@ -169,97 +233,13 @@ Exemplo de criação (o campo `status` enviado na criação é ignorado):
 }
 ```
 
-### Paginação e filtro
-
-`GET /tarefas` aceita os parâmetros:
-
-| Parâmetro | Descrição | Padrão |
-| --- | --- | --- |
-| `status` | Filtra por status | todos |
-| `page` | Número da página (começa em 0) | 0 |
-| `size` | Itens por página (máximo 50) | 10 |
-| `sort` | Campo e direção, ex.: `titulo,asc` | `dataValidade` |
-
-Formato da resposta:
-
+**Response: 201 Created**
 ```json
 {
-  "conteudo": [],
-  "pagina": 0,
-  "tamanho": 10,
-  "totalElementos": 25,
-  "totalPaginas": 3
-}
-```
-
-## Regras de Negócio
-
-### Status das tarefas
-
-Toda tarefa nasce `PENDENTE`. Transições permitidas:
-
-| De | Para |
-| --- | --- |
-| `PENDENTE` | `EM_ANDAMENTO`, `CONCLUIDA`, `CANCELADA` |
-| `EM_ANDAMENTO` | `PENDENTE`, `CONCLUIDA`, `CANCELADA` |
-| `CONCLUIDA` | nenhuma |
-| `CANCELADA` | nenhuma |
-
-Transição inválida retorna **422**. A regra vale para o PATCH e para o PUT.
-
-### Validações
-
-- Título: obrigatório, até 120 caracteres
-- Descrição: obrigatória, até 255 caracteres
-- Nome do usuário: obrigatório, até 100 caracteres
-- Email: obrigatório, formato válido, até 255 caracteres, único
-- Data de validade: obrigatória e não pode estar no passado (no PUT, só é validada se for alterada, o que permite editar tarefas já atrasadas)
-- O usuário vinculado à tarefa deve existir
-
-## Tratamento de Erros
-
-Respostas padronizadas:
-
-```json
-{
-  "status": 404,
-  "mensagem": "Tarefa não encontrada",
-  "timestamp": "2026-10-17T10:00:00"
-}
-```
-
-| Situação | Status |
-| --- | --- |
-| Campos inválidos (todas as mensagens, separadas por `;`) | 400 |
-| JSON malformado ou enum inexistente no corpo | 400 |
-| Parâmetro inválido (ex.: `status=XYZ`) ou campo de ordenação inexistente | 400 |
-| Data de validade no passado | 400 |
-| Usuário ou tarefa não encontrados | 404 |
-| Email já cadastrado | 409 |
-| Exclusão de usuário que possui tarefas | 409 |
-| Transição de status inválida | 422 |
-| Erro inesperado | 500 |
-
-## Documentação Swagger
-
-Com a aplicação rodando: `http://localhost:8080/swagger-ui/index.html`
-
-## Testes
-
-```
-./mvnw test
-```
-
-- Testes unitários dos services (cenários de sucesso e de erro, regras de status e de data)
-- Teste da regra de transição do enum `StatusTarefa`
-- Teste de contexto da aplicação, que usa H2 em memória e não exige PostgreSQL
-
-## Licença
-
-Projeto desenvolvido para fins educacionais.
-
-## Autor
-
-Desenvolvido por **Thyago Antonio Sampaio Valadares** como projeto de portfólio.
-
-[![GitHub](https://img.shields.io/badge/GitHub-Thyago1992-181717?style=flat&logo=github)](https://github.com/Thyago1992)
+  "id": 1,
+  "titulo": "Estudar Spring Boot",
+  "descricao": "Revisar conceitos de JPA e REST",
+  "status": "PENDENTE",
+  "prioridade": "ALTA",
+  "dataCriacao": "2026-10-17",
+  "dataValidade":
